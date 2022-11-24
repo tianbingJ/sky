@@ -52,6 +52,8 @@ startL:
 	case ')':
 		l.advance()
 		return newToken(RPAREN, RPAREN, l.line, l.column-1)
+	case '^':
+		return newToken(EXP, EXP, l.line, l.column-1)
 	case ',':
 		l.advance()
 		return newToken(COMMA, COMMA, l.line, l.column-1)
@@ -64,6 +66,11 @@ startL:
 	case '*':
 		l.advance()
 		return newToken(STAR, STAR, l.line, l.column-1)
+	case '&':
+		l.advance()
+		return newToken(AND_BIT, AND_BIT, l.line, l.column-1)
+	case '|':
+		return newToken(OR_BIT, OR_BIT, l.line, l.column-1)
 	case '%':
 		l.advance()
 		return newToken(MOD, MOD, l.line, l.column-1)

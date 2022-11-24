@@ -16,6 +16,7 @@ const (
 	STAR   = "*"
 	SLASH  = "/"
 	MOD    = "%"
+	EXP    = "^"
 
 	LT     = "<"
 	LEQ    = "<="
@@ -23,6 +24,12 @@ const (
 	GEQ    = ">="
 	EQ     = "=="
 	NOT_EQ = "!="
+
+	AND = "and"
+	OR  = "or"
+
+	AND_BIT = "&"
+	OR_BIT  = "|"
 
 	COMMA = ","
 
@@ -73,6 +80,8 @@ var keywords = map[tokenType]tokenType{
 	RETURN: RETURN,
 	WHILE:  WHILE,
 	FOR:    FOR,
+	AND:    AND,
+	OR:     OR,
 }
 
 func toKeyword(key tokenType) (bool, tokenType) {
