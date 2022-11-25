@@ -21,23 +21,23 @@ func doTest(source string, expected []tokenTest, ignoreLine, ignoreColumn bool, 
 		expectedColumn:    0,
 	})
 	if len(tokens) != len(expected) {
-		t.Errorf("expected token size %d, actual size %d", len(expected), len(tokens))
+		t.Errorf("expected name size %d, actual size %d", len(expected), len(tokens))
 	}
 	for i, tok := range tokens {
 		if tok.tokenType != expected[i].expectedTokenType {
-			t.Errorf("testFail for token: %q, expected token type %s, actual type %s", tok, expected[i].expectedTokenType, tok.tokenType)
+			t.Errorf("testFail for name: %q, expected name type %s, actual type %s", tok, expected[i].expectedTokenType, tok.tokenType)
 		}
 		if tok.lexeme != expected[i].expectedLexeme {
-			t.Errorf("testFail for token: %q, expected token lexeme %s, actual lexeme %s", tok, expected[i].expectedTokenType, tok.tokenType)
+			t.Errorf("testFail for name: %q, expected name lexeme %s, actual lexeme %s", tok, expected[i].expectedTokenType, tok.tokenType)
 		}
 		if tok.tokenType == EOF {
 			continue
 		}
 		if !ignoreLine && tok.line != expected[i].expectedLine {
-			t.Errorf("testFail for token: %q, expected token line %d, actual line %d", tok, expected[i].expectedLine, tok.line)
+			t.Errorf("testFail for name: %q, expected name line %d, actual line %d", tok, expected[i].expectedLine, tok.line)
 		}
 		if !ignoreColumn && tok.column != expected[i].expectedColumn {
-			t.Errorf("testFail for token: %q, expected token column %d, actual column %d", tok, expected[i].expectedColumn, tok.column)
+			t.Errorf("testFail for name: %q, expected name column %d, actual column %d", tok, expected[i].expectedColumn, tok.column)
 		}
 	}
 

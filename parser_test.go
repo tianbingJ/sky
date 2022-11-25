@@ -31,7 +31,7 @@ func TestUnary(t *testing.T) {
 		t.Errorf("expect unaryExpr")
 	}
 	if value.token.tokenType != MINUS {
-		t.Errorf("token should bu MINUS.")
+		t.Errorf("name should bu MINUS.")
 	}
 
 	innerValue, ok := value.expression.(*unaryExpr)
@@ -39,7 +39,7 @@ func TestUnary(t *testing.T) {
 		t.Errorf("expect unaryExpr")
 	}
 	if innerValue.token.tokenType != MINUS {
-		t.Errorf("token should be MINUS.")
+		t.Errorf("name should be MINUS.")
 	}
 	literal, ok := innerValue.expression.(*literalExpr)
 	if !ok || literal.value != 10 {
@@ -47,7 +47,7 @@ func TestUnary(t *testing.T) {
 	}
 }
 
-//test association
+//test left association
 func TestAdd(t *testing.T) {
 	s := `1 + 2 - 3`
 	p := getParser(s)
@@ -63,6 +63,30 @@ func TestAdd(t *testing.T) {
 		t.Errorf("result is not binary expression.")
 	}
 	assert(t, leftRoot.operator.tokenType == PLUS, "left association, left root should be PLUS")
+}
+
+//test right association
+func TestAssign(t *testing.T) {
+	s := `a = b = 1 ^ 2`
+	//		a
+	//  		b
+	//			  (+ 1 2)
+	p := getParser(s)
+	exp := p.assign()
+	exprRoot, ok := exp.(*assignExpr)
+	if !ok {
+		t.Errorf("result is not assign expression.")
+	}
+	assert(t, exprRoot.name.tokenType == IDENTIFIER, "")
+	assert(t, exprRoot.name.lexeme == "a", "")
+	if !ok {
+		t.Errorf("result is not assign expression.")
+	}
+
+	nextExpr, ok := exprRoot.expr.(*assignExpr)
+	assert(t, nextExpr.name.tokenType == IDENTIFIER, "")
+	assert(t, nextExpr.name.lexeme == "b", "")
+
 }
 
 //test precedence

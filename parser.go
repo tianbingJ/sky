@@ -61,14 +61,15 @@ func (p *parser) assign() expr {
 	left := p.andOr()
 	nextType := p.peek().tokenType
 	if nextType == ASSIGN {
-		if _, ok := left.(*variableExpr); !ok {
+		name, ok := left.(*variableExpr)
+		if !ok {
 			panic(newSyntaxError("should be variable before '='", p.peek()))
 		}
-		op := p.consumeRaw()
+		p.consumeRaw()
 		right := p.assign()
-		return newBinaryExpr(op, left, right)
+		return newAssignExpr(name.token, right)
 	}
-	return p.andOr()
+	return left
 }
 
 func (p *parser) andOr() expr {
@@ -78,6 +79,7 @@ func (p *parser) andOr() expr {
 		op := p.consumeRaw()
 		right := p.bit()
 		expression = newBinaryExpr(op, expression, right)
+		nextType = p.peek().tokenType
 	}
 	return expression
 
@@ -90,6 +92,7 @@ func (p *parser) bit() expr {
 		op := p.consumeRaw()
 		right := p.eq()
 		expression = newBinaryExpr(op, expression, right)
+		nextType = p.peek().tokenType
 	}
 	return expression
 }
@@ -100,8 +103,8 @@ func (p *parser) eq() expr {
 	for nextType == EQ || nextType == NOT_EQ {
 		op := p.consumeRaw()
 		right := p.add()
-		nextType = p.peek().tokenType
 		expression = newBinaryExpr(op, expression, right)
+		nextType = p.peek().tokenType
 	}
 	return expression
 }
@@ -112,8 +115,8 @@ func (p *parser) compare() expr {
 	for nextType == LEQ || nextType == LT || nextType == GT || nextType == GEQ {
 		op := p.consumeRaw()
 		right := p.add()
-		nextType = p.peek().tokenType
 		expression = newBinaryExpr(op, expression, right)
+		nextType = p.peek().tokenType
 	}
 	return expression
 }
@@ -125,8 +128,8 @@ func (p *parser) add() expr {
 	for nextType == PLUS || nextType == MINUS {
 		op := p.consumeRaw()
 		right := p.multiply()
-		nextType = p.peek().tokenType
 		expression = newBinaryExpr(op, expression, right)
+		nextType = p.peek().tokenType
 	}
 	return expression
 }

@@ -5,6 +5,7 @@ type visitor interface {
 	visitUnaryExpr() interface{}
 	visitLiteralExpr() interface{}
 	visitVariableExpr() interface{}
+	visitAssignExpr() interface{}
 }
 
 type expr interface {
@@ -75,4 +76,21 @@ func newVariableExpr(tok token) *variableExpr {
 
 func (u *variableExpr) accept(v visitor) interface{} {
 	return v.visitVariableExpr()
+}
+
+//*********** assign expr
+type assignExpr struct {
+	name token
+	expr expr
+}
+
+func newAssignExpr(tok token, exp expr) *assignExpr {
+	return &assignExpr{
+		name: tok,
+		expr: exp,
+	}
+}
+
+func (as *assignExpr) accept(v visitor) interface{} {
+	return v.visitAssignExpr()
 }
