@@ -57,6 +57,93 @@ func (p *parser) parse() []stmt {
 	return nil
 }
 
+func (p *parser) assign() expr {
+	left := p.andOr()
+	nextType := p.peek().tokenType
+	if nextType == ASSIGN {
+		if _, ok := left.(*variableExpr); !ok {
+			panic(newSyntaxError("should be variable before '='", p.peek()))
+		}
+		op := p.consumeRaw()
+		right := p.assign()
+		return newBinaryExpr(op, left, right)
+	}
+	return p.andOr()
+}
+
+func (p *parser) andOr() expr {
+	expression := p.bit()
+	nextType := p.peek().tokenType
+	for nextType == AND || nextType == OR {
+		op := p.consumeRaw()
+		right := p.bit()
+		expression = newBinaryExpr(op, expression, right)
+	}
+	return expression
+
+}
+
+func (p *parser) bit() expr {
+	expression := p.eq()
+	nextType := p.peek().tokenType
+	for nextType == AND_BIT || nextType == OR_BIT || nextType == XOR_BIT || nextType == LSHIFT || nextType == RSHIFT {
+		op := p.consumeRaw()
+		right := p.eq()
+		expression = newBinaryExpr(op, expression, right)
+	}
+	return expression
+}
+
+func (p *parser) eq() expr {
+	expression := p.compare()
+	nextType := p.peek().tokenType
+	for nextType == EQ || nextType == NOT_EQ {
+		op := p.consumeRaw()
+		right := p.add()
+		nextType = p.peek().tokenType
+		expression = newBinaryExpr(op, expression, right)
+	}
+	return expression
+}
+
+func (p *parser) compare() expr {
+	expression := p.add()
+	nextType := p.peek().tokenType
+	for nextType == LEQ || nextType == LT || nextType == GT || nextType == GEQ {
+		op := p.consumeRaw()
+		right := p.add()
+		nextType = p.peek().tokenType
+		expression = newBinaryExpr(op, expression, right)
+	}
+	return expression
+}
+
+//+ -
+func (p *parser) add() expr {
+	expression := p.multiply()
+	nextType := p.peek().tokenType
+	for nextType == PLUS || nextType == MINUS {
+		op := p.consumeRaw()
+		right := p.multiply()
+		nextType = p.peek().tokenType
+		expression = newBinaryExpr(op, expression, right)
+	}
+	return expression
+}
+
+//* / %
+func (p *parser) multiply() expr {
+	expression := p.unary()
+	nextType := p.peek().tokenType
+	for nextType == STAR || nextType == SLASH || nextType == MOD {
+		op := p.consumeRaw()
+		rightExpr := p.unary()
+		expression = newBinaryExpr(op, expression, rightExpr)
+		nextType = p.peek().tokenType
+	}
+	return expression
+}
+
 func (p *parser) unary() expr {
 	if p.check(BANG) || p.check(MINUS) {
 		tok := p.peek()
@@ -85,8 +172,10 @@ func (p *parser) primary() expr {
 		e = newLiteralExpr(false)
 	case NIL:
 		e = newLiteralExpr(nil)
+	case IDENTIFIER:
+		e = newVariableExpr(nextTok)
 	default:
-		panic(newSyntaxError("expressoin", nextTok))
+		panic(newSyntaxError("expression", nextTok))
 	}
 	p.consumeRaw()
 	return e

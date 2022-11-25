@@ -4,6 +4,7 @@ type visitor interface {
 	visitBinaryExpr() interface{}
 	visitUnaryExpr() interface{}
 	visitLiteralExpr() interface{}
+	visitVariableExpr() interface{}
 }
 
 type expr interface {
@@ -11,12 +12,12 @@ type expr interface {
 }
 
 type binaryExpr struct {
-	operator tokenType
+	operator token
 	left     expr
 	right    expr
 }
 
-func newBinaryExpr(tokType tokenType, left, right expr) *binaryExpr {
+func newBinaryExpr(tokType token, left, right expr) *binaryExpr {
 	return &binaryExpr{
 		operator: tokType,
 		left:     left,
@@ -42,6 +43,8 @@ func (l *literalExpr) accept(v visitor) interface{} {
 	return v.visitLiteralExpr()
 }
 
+//************ unary expr
+
 type unaryExpr struct {
 	token      token
 	expression expr
@@ -56,4 +59,20 @@ func newUnaryExpr(tok token, expression expr) *unaryExpr {
 
 func (u *unaryExpr) accept(v visitor) interface{} {
 	return v.visitUnaryExpr()
+}
+
+//************ variableExpr expr
+
+type variableExpr struct {
+	token token
+}
+
+func newVariableExpr(tok token) *variableExpr {
+	return &variableExpr{
+		token: tok,
+	}
+}
+
+func (u *variableExpr) accept(v visitor) interface{} {
+	return v.visitVariableExpr()
 }

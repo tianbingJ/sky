@@ -17,7 +17,7 @@ const (
 	STAR   = "*"
 	SLASH  = "/"
 	MOD    = "%"
-	EXP    = "^"
+	EXP    = "**"
 
 	LT     = "<"
 	LEQ    = "<="
@@ -31,6 +31,9 @@ const (
 
 	AND_BIT = "&"
 	OR_BIT  = "|"
+	XOR_BIT = "^"
+	LSHIFT  = "<<"
+	RSHIFT  = ">>"
 
 	COMMA = ","
 
