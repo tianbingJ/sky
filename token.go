@@ -8,6 +8,7 @@ const (
 	IDENTIFIER = "IDENTIFIER"
 	INT        = "INT"
 	FLOAT      = "FLOAT"
+	STRING     = "STRING"
 
 	ASSIGN = "="
 	PLUS   = "+"
@@ -51,6 +52,7 @@ const (
 	RETURN = "return"
 	WHILE  = "while"
 	FOR    = "for"
+	NIL    = "nil"
 )
 
 type token struct {
@@ -82,6 +84,7 @@ var keywords = map[tokenType]tokenType{
 	FOR:    FOR,
 	AND:    AND,
 	OR:     OR,
+	NIL:    NIL,
 }
 
 func toKeyword(key tokenType) (bool, tokenType) {

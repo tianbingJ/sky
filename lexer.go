@@ -137,6 +137,23 @@ startL:
 			return newToken(GEQ, GEQ, l.line, l.column-2)
 		}
 		return newToken(GT, GT, l.line, l.column-1)
+	case '"':
+		l.advance()
+		startLine := l.line
+		startColumn := l.column
+		startIdx := l.current
+		for l.peek() != 0 && l.peek() != '"' {
+			if l.peek() == '\n' {
+				panic(fmt.Sprintf("string cannot cross multi-line at line %d, column %d", startLine, startColumn))
+			}
+			l.advance()
+		}
+		if l.peek() == 0 {
+			panic(fmt.Sprintf("expecting '\"' at line %d  column %d ", startLine, startColumn))
+		}
+		strValue := l.source[startIdx:l.current]
+		l.advance()
+		return newToken(STRING, strValue, startLine, startColumn)
 	default:
 		if isDigit(ch) {
 			start := l.current
