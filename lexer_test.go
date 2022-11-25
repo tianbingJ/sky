@@ -14,6 +14,12 @@ type tokenTest struct {
 func doTest(source string, expected []tokenTest, ignoreLine, ignoreColumn bool, t *testing.T) {
 	l := NewLexer(source)
 	tokens := l.parse()
+	expected = append(expected, tokenTest{
+		expectedTokenType: EOF,
+		expectedLexeme:    EOF,
+		expectedLine:      0,
+		expectedColumn:    0,
+	})
 	if len(tokens) != len(expected) {
 		t.Errorf("expected token size %d, actual size %d", len(expected), len(tokens))
 	}
@@ -23,6 +29,9 @@ func doTest(source string, expected []tokenTest, ignoreLine, ignoreColumn bool, 
 		}
 		if tok.lexeme != expected[i].expectedLexeme {
 			t.Errorf("testFail for token: %q, expected token lexeme %s, actual lexeme %s", tok, expected[i].expectedTokenType, tok.tokenType)
+		}
+		if tok.tokenType == EOF {
+			continue
 		}
 		if !ignoreLine && tok.line != expected[i].expectedLine {
 			t.Errorf("testFail for token: %q, expected token line %d, actual line %d", tok, expected[i].expectedLine, tok.line)

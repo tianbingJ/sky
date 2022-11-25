@@ -24,9 +24,11 @@ func NewLexer(source string) *lexer {
 
 func (l *lexer) parse() []token {
 	r := make([]token, 0)
-	for tok := l.nextToken(); tok.tokenType != EOF; tok = l.nextToken() {
+	var tok token
+	for tok = l.nextToken(); tok.tokenType != EOF; tok = l.nextToken() {
 		r = append(r, tok)
 	}
+	r = append(r, tok)
 	return r
 }
 
