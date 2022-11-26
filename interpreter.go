@@ -1,13 +1,22 @@
 package sky
 
 type interpreter struct {
+	global  *symbolTable
+	current *symbolTable
 }
 
 func newInterpreter() *interpreter {
-	return &interpreter{}
+	globalTable := newSymbolTable(nil)
+	return &interpreter{
+		global:  globalTable,
+		current: globalTable,
+	}
 }
 
-func (i *interpreter) interpret() {
+func (i *interpreter) interpret(statements []stmt) {
+	for k := 0; k < len(statements); k++ {
+		statements[k].accept(i)
+	}
 }
 
 func (i *interpreter) interpretExpression(exprs []expr) []interface{} {
@@ -63,15 +72,29 @@ func (i *interpreter) visitLiteralExpr(expression *literalExpr) interface{} {
 }
 
 func (i *interpreter) visitVariableExpr(expression *variableExpr) interface{} {
-	//TODO
-	return nil
+	return i.current.getVariableValue(expression.token)
 }
 
 func (i *interpreter) visitAssignExpr(expression *assignExpr) interface{} {
-	//TODO
-	return nil
+	var value interface{}
+	if expression.expr != nil {
+		value = i.evaluate(expression.expr)
+	}
+	i.current.assign(expression.name, value)
+	return value
 }
 
 func (i *interpreter) evaluate(expression expr) interface{} {
 	return expression.accept(i)
+}
+
+func (i *interpreter) visitVarStmt(varStmt *varStmt) {
+	var value interface{}
+	if varStmt.initializer != nil {
+		value = i.evaluate(varStmt.initializer)
+	}
+	i.current.define(varStmt.name, value)
+}
+func (i *interpreter) visitExpressionStmt(expressionStmt *expressionStmt) {
+	i.evaluate(expressionStmt.value)
 }

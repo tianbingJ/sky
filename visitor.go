@@ -9,6 +9,6 @@ type exprVisitor interface {
 }
 
 type stmtVisitor interface {
-	visitVarStmt() interface{}
-	visitExpressionStmt() interface{}
+	visitVarStmt(varStmt *varStmt)
+	visitExpressionStmt(expressionStmt *expressionStmt)
 }

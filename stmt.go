@@ -1,7 +1,7 @@
 package sky
 
 type stmt interface {
-	accept(v stmtVisitor) interface{}
+	accept(v stmtVisitor)
 }
 
 //*************** var stmt
@@ -17,13 +17,12 @@ func newVarStmt(name token, initializer expr) stmt {
 	}
 }
 
-func (vStmt *varStmt) accept(v stmtVisitor) interface{} {
-	return v.visitVarStmt()
+func (vStmt *varStmt) accept(v stmtVisitor) {
+	v.visitVarStmt(vStmt)
 }
 
 //***************  expression stmt
 type expressionStmt struct {
-	name  token
 	value expr
 }
 
@@ -33,6 +32,6 @@ func newExpressionStmt(value expr) stmt {
 	}
 }
 
-func (eStmt *expressionStmt) accept(v stmtVisitor) interface{} {
-	return v.visitVarStmt()
+func (eStmt *expressionStmt) accept(v stmtVisitor) {
+	v.visitExpressionStmt(eStmt)
 }

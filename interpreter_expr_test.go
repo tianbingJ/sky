@@ -33,8 +33,16 @@ func TestArith(t *testing.T) {
 		{"2 != 2", false},
 		{"2 == 2.0", true},
 		{"2 != 2.0", false},
+		{"(1+ 2) == 3", true},
+		{"!true", false},
+		{"!false", true},
+		{"true and true", true},
+		{"true and false", false},
+		{"true or false", true},
+		{"false or false", false},
 		{`"hello" == "world"`, false},
 		{`"hello" <= "world"`, true},
+		{`"hello" > "world"`, false},
 	}
 	doTestArith(t, tests)
 }
