@@ -3,6 +3,22 @@ package sky
 type interpreter struct {
 }
 
+func newInterpreter() *interpreter {
+	return &interpreter{}
+}
+
+func (i *interpreter) interpret() {
+
+}
+
+func (i *interpreter) interpretExpression(exprs []expr) []interface{} {
+	r := make([]interface{}, 0)
+	for idx := 0; idx < len(exprs); idx++ {
+		r = append(r, exprs[idx].accept(i))
+	}
+	return r
+}
+
 func (i *interpreter) visitBinaryExpr(expression *binaryExpr) interface{} {
 	op := expression.operator
 	left := i.evaluate(expression.left)

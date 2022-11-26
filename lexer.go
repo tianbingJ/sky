@@ -142,7 +142,7 @@ startL:
 	case '>':
 		l.advance()
 		next := l.peek()
-		if next == '-' {
+		if next == '=' {
 			l.advance()
 			return newToken(GEQ, GEQ, l.line, l.column-2)
 		}

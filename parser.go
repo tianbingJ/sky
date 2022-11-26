@@ -202,22 +202,32 @@ func (p *parser) primary() expr {
 	case INT:
 		v, _ := strconv.ParseInt(nextTok.lexeme, 10, 64)
 		e = newLiteralExpr(v)
+		p.consumeRaw()
 	case FLOAT:
 		v, _ := strconv.ParseFloat(nextTok.lexeme, 64)
 		e = newLiteralExpr(v)
+		p.consumeRaw()
 	case STRING:
 		e = newLiteralExpr(nextTok.lexeme)
+		p.consumeRaw()
 	case TRUE:
 		e = newLiteralExpr(true)
+		p.consumeRaw()
 	case FALSE:
 		e = newLiteralExpr(false)
+		p.consumeRaw()
 	case NIL:
 		e = newLiteralExpr(nil)
+		p.consumeRaw()
 	case IDENTIFIER:
 		e = newVariableExpr(nextTok)
+		p.consumeRaw()
+	case LPAREN:
+		p.consumeRaw()
+		e = p.expression()
+		p.consume(RPAREN)
 	default:
 		panic(newSyntaxError("expression", nextTok))
 	}
-	p.consumeRaw()
 	return e
 }

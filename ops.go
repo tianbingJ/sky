@@ -1,5 +1,7 @@
 package sky
 
+import "fmt"
+
 func evaluateBinary(operator token, left, right interface{}) interface{} {
 	if operator.tokenType == PLUS {
 		ls, okl := left.(string)
@@ -74,9 +76,84 @@ func evaluateBinary(operator token, left, right interface{}) interface{} {
 		case MINUS:
 			return il - ir
 		}
+	case EQ, NOT_EQ, GT, GEQ, LT, LEQ:
+		return evaluateEqAndCompare(operator, left, right)
 	default:
 	}
-	panic(newRuntimeError("unsupported operator", operator))
+	panic(newRuntimeError("unsupported operator "+operator.lexeme, operator))
+}
+
+func evaluateEqAndCompare(operator token, left, right interface{}) bool {
+	if bothInt(left, right) {
+		return evaluateIntEqAndCompare(operator, left, right)
+	}
+	if bothNumbers(left, right) {
+		return evaluateFloatEqAndCompare(operator, left, right)
+	}
+	if bothString(left, right) {
+		return evaluateStringEqAndCompare(operator, left, right)
+	}
+	panic(newRuntimeError(fmt.Sprintf("should compare between %T and %T", left, right), operator))
+}
+
+func evaluateIntEqAndCompare(operator token, left, right interface{}) bool {
+	lValue, _ := left.(int64)
+	rValue, _ := right.(int64)
+	switch operator.tokenType {
+	case EQ:
+		return lValue == rValue
+	case NOT_EQ:
+		return lValue != rValue
+	case GT:
+		return lValue > rValue
+	case GEQ:
+		return lValue >= rValue
+	case LT:
+		return lValue < rValue
+	case LEQ:
+		return lValue <= rValue
+	}
+	panic(newRuntimeError("not reachable here", operator))
+}
+
+func evaluateFloatEqAndCompare(operator token, left, right interface{}) bool {
+	lValue := toFloat(left, operator)
+	rValue := toFloat(right, operator)
+	switch operator.tokenType {
+	case EQ:
+		return lValue == rValue
+	case NOT_EQ:
+		return lValue != rValue
+	case GT:
+		return lValue > rValue
+	case GEQ:
+		return lValue >= rValue
+	case LT:
+		return lValue < rValue
+	case LEQ:
+		return lValue <= rValue
+	}
+	panic(newRuntimeError("not reachable here", operator))
+}
+
+func evaluateStringEqAndCompare(operator token, left, right interface{}) bool {
+	lValue, _ := left.(string)
+	rValue, _ := right.(string)
+	switch operator.tokenType {
+	case EQ:
+		return lValue == rValue
+	case NOT_EQ:
+		return lValue != rValue
+	case GT:
+		return lValue > rValue
+	case GEQ:
+		return lValue >= rValue
+	case LT:
+		return lValue < rValue
+	case LEQ:
+		return lValue <= rValue
+	}
+	panic(newRuntimeError("not reachable here", operator))
 }
 
 func isTruthy(value interface{}) bool {
@@ -99,19 +176,35 @@ func toFloat(value interface{}, operator token) float64 {
 	panic(newRuntimeError("not reachable here", operator))
 }
 
+func bothString(left, right interface{}) bool {
+	_, isStringL := left.(string)
+	_, isStringR := right.(string)
+	return isStringL && isStringR
+}
+
 func hasFloat(left, right interface{}) bool {
 	_, leftFloat := left.(float64)
 	_, rightFlot := right.(float64)
 	return leftFloat || rightFlot
 }
 
-func checkBothNumbers(left, right interface{}, operator token) {
+func bothInt(left, right interface{}) bool {
+	_, okl := left.(int64)
+	_, okr := right.(int64)
+	return okl && okr
+}
+
+func bothNumbers(left, right interface{}) bool {
 	_, lInt := left.(int64)
 	_, rInt := right.(int64)
 	_, lFloat := left.(float64)
-	_, rFloat := right.(int64)
-	bothNumbers := (lInt || lFloat) && (rInt || rFloat)
-	if !bothNumbers {
+	_, rFloat := right.(float64)
+	return (lInt || lFloat) && (rInt || rFloat)
+}
+
+func checkBothNumbers(left, right interface{}, operator token) {
+	bothNumber := bothNumbers(left, right)
+	if !bothNumber {
 		panic(newRuntimeError("both value should be numbers", operator))
 	}
 }
