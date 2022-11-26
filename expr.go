@@ -1,15 +1,7 @@
 package sky
 
-type visitor interface {
-	visitBinaryExpr() interface{}
-	visitUnaryExpr() interface{}
-	visitLiteralExpr() interface{}
-	visitVariableExpr() interface{}
-	visitAssignExpr() interface{}
-}
-
 type expr interface {
-	accept(v visitor) interface{}
+	accept(v exprVisitor) interface{}
 }
 
 type binaryExpr struct {
@@ -26,9 +18,11 @@ func newBinaryExpr(tokType token, left, right expr) *binaryExpr {
 	}
 }
 
-func (l *binaryExpr) accept(v visitor) interface{} {
-	return v.visitBinaryExpr()
+func (l *binaryExpr) accept(v exprVisitor) interface{} {
+	return v.visitBinaryExpr(l)
 }
+
+//************ liter expr
 
 type literalExpr struct {
 	value interface{}
@@ -40,8 +34,8 @@ func newLiteralExpr(value interface{}) *literalExpr {
 	}
 }
 
-func (l *literalExpr) accept(v visitor) interface{} {
-	return v.visitLiteralExpr()
+func (l *literalExpr) accept(v exprVisitor) interface{} {
+	return v.visitLiteralExpr(l)
 }
 
 //************ unary expr
@@ -58,8 +52,8 @@ func newUnaryExpr(tok token, expression expr) *unaryExpr {
 	}
 }
 
-func (u *unaryExpr) accept(v visitor) interface{} {
-	return v.visitUnaryExpr()
+func (u *unaryExpr) accept(v exprVisitor) interface{} {
+	return v.visitUnaryExpr(u)
 }
 
 //************ variableExpr expr
@@ -74,8 +68,8 @@ func newVariableExpr(tok token) *variableExpr {
 	}
 }
 
-func (u *variableExpr) accept(v visitor) interface{} {
-	return v.visitVariableExpr()
+func (u *variableExpr) accept(v exprVisitor) interface{} {
+	return v.visitVariableExpr(u)
 }
 
 //*********** assign expr
@@ -91,6 +85,6 @@ func newAssignExpr(tok token, exp expr) *assignExpr {
 	}
 }
 
-func (as *assignExpr) accept(v visitor) interface{} {
-	return v.visitAssignExpr()
+func (as *assignExpr) accept(v exprVisitor) interface{} {
+	return v.visitAssignExpr(as)
 }

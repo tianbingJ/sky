@@ -54,7 +54,45 @@ func (p *parser) consume(tokType tokenType) token {
 }
 
 func (p *parser) parse() []stmt {
-	return nil
+	stmts := make([]stmt, 0)
+	for !p.atEnd() {
+		stmts = append(stmts, p.declaration())
+	}
+	return stmts
+}
+
+func (p *parser) declaration() stmt {
+	nextTokType := p.peek().tokenType
+	if nextTokType == VAR {
+		return p.varStatement()
+	}
+	return p.statement()
+}
+
+func (p *parser) varStatement() stmt {
+	p.consumeRaw()
+	name := p.consume(IDENTIFIER)
+	var initializer expr
+	if p.peek().tokenType == ASSIGN {
+		p.consume(ASSIGN)
+		initializer = p.expression()
+	}
+	p.consume(SEMICOLON)
+	return newVarStmt(name, initializer)
+}
+
+func (p *parser) statement() stmt {
+	return p.expressionStmt()
+}
+
+func (p *parser) expressionStmt() stmt {
+	value := p.expression()
+	p.consume(SEMICOLON)
+	return newExpressionStmt(value)
+}
+
+func (p *parser) expression() expr {
+	return p.assign()
 }
 
 func (p *parser) assign() expr {
@@ -162,7 +200,7 @@ func (p *parser) primary() expr {
 	var e expr = nil
 	switch nextTok.tokenType {
 	case INT:
-		v, _ := strconv.Atoi(nextTok.lexeme)
+		v, _ := strconv.ParseInt(nextTok.lexeme, 10, 64)
 		e = newLiteralExpr(v)
 	case FLOAT:
 		v, _ := strconv.ParseFloat(nextTok.lexeme, 64)

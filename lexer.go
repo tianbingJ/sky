@@ -209,7 +209,7 @@ func isFloat(s string) bool {
 }
 
 func isInt(s string) bool {
-	if _, err := strconv.Atoi(s); err == nil {
+	if _, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return true
 	}
 	return false

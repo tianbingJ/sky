@@ -35,3 +35,20 @@ func newSyntaxError(expected string, tok token) error {
 		token:    tok,
 	}
 }
+
+type runtimeError struct {
+	msg   string
+	token token
+}
+
+func (e runtimeError) Error() string {
+	return fmt.Sprintf("%s at line %d  column %d\n",
+		e.msg, e.token.line, e.token.column)
+}
+
+func newRuntimeError(msg string, tok token) error {
+	return runtimeError{
+		msg:   msg,
+		token: tok,
+	}
+}
