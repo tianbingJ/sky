@@ -144,7 +144,7 @@ y
 
 func TestBitOp(t *testing.T) {
 	s := `
-	<< >> | ^ & ** and or
+	<< >> | ^ & and or
 `
 	expected := []tokenTest{
 		{LSHIFT, LSHIFT, 0, 0},
@@ -152,7 +152,6 @@ func TestBitOp(t *testing.T) {
 		{OR_BIT, OR_BIT, 0, 0},
 		{XOR_BIT, XOR_BIT, 0, 0},
 		{AND_BIT, AND_BIT, 0, 0},
-		{EXP, EXP, 0, 0},
 		{AND, AND, 0, 0},
 		{OR, OR, 0, 0},
 	}

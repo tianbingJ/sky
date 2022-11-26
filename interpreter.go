@@ -8,7 +8,6 @@ func newInterpreter() *interpreter {
 }
 
 func (i *interpreter) interpret() {
-
 }
 
 func (i *interpreter) interpretExpression(exprs []expr) []interface{} {

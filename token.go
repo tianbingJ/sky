@@ -17,7 +17,6 @@ const (
 	STAR   = "*"
 	SLASH  = "/"
 	MOD    = "%"
-	EXP    = "**"
 
 	LT     = "<"
 	LEQ    = "<="

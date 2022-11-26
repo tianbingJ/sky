@@ -65,10 +65,6 @@ startL:
 		return newToken(MINUS, MINUS, l.line, l.column-1)
 	case '*':
 		l.advance()
-		if l.peek() == '*' {
-			l.advance()
-			return newToken(EXP, EXP, l.line, l.column-2)
-		}
 		return newToken(STAR, STAR, l.line, l.column-1)
 	case '&':
 		l.advance()

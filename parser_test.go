@@ -9,7 +9,7 @@ func TestLiteralPrimary(t *testing.T) {
 	1 1.2 "hello" true false
 `
 	p := getParser(s)
-	values := []interface{}{1, 1.2, "hello", true, false}
+	values := []interface{}{int64(1), 1.2, "hello", true, false}
 	for i := 0; i < len(values); i++ {
 		v := p.primary()
 		value, ok := v.(*literalExpr)
@@ -17,7 +17,7 @@ func TestLiteralPrimary(t *testing.T) {
 			t.Errorf("index %d is not literalExpr", i)
 		}
 		if value.value != values[i] {
-			t.Errorf("expected: %q, actual: %q", values[i], v)
+			t.Errorf("expected: %q(%T), actual: %q(%T)", values[i], values[i], v, v)
 		}
 	}
 }
@@ -42,7 +42,7 @@ func TestUnary(t *testing.T) {
 		t.Errorf("name should be MINUS.")
 	}
 	literal, ok := innerValue.expression.(*literalExpr)
-	if !ok || literal.value != 10 {
+	if !ok || literal.value != int64(10) {
 		t.Errorf("expect Literal '10'")
 	}
 }
