@@ -104,11 +104,13 @@ func (i *interpreter) visitExpressionStmt(expressionStmt *expressionStmt) {
 
 func (i *interpreter) visitBlockStmt(block *blockStmt) {
 	prev := i.current
+	defer func() {
+		i.current = prev
+	}()
 	i.current = newSymbolTable(i.current)
 	for k := 0; k < len(block.statements); k++ {
 		block.statements[k].accept(i)
 	}
-	i.current = prev
 }
 
 func (i *interpreter) visitIfStmt(ifstmt *ifStmt) {
@@ -163,4 +165,22 @@ func (i *interpreter) visitForStmt(forstmt *forStmt) {
 
 func (i *interpreter) visitBreakStmt(breakStmt *breakStmt) {
 	panic(break_code)
+}
+
+func (i *interpreter) visitWhileStmt(st *whileStmt) {
+	prev := i.current
+	i.current = newSymbolTable(i.current)
+	defer func() {
+		i.current = prev
+	}()
+	defer func() {
+		v := recover()
+		if value, ok := v.(control_code); ok && value == break_code {
+			return
+		}
+		panic(v)
+	}()
+	for isTruthy(st.condition) {
+		st.whileBlock.accept(i)
+	}
 }

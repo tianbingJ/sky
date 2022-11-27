@@ -125,7 +125,7 @@ func (forst *forStmt) accept(v stmtVisitor) {
 	v.visitForStmt(forst)
 }
 
-//***************
+//*************** break stmt
 
 type breakStmt struct {
 	breakToken token
@@ -140,4 +140,21 @@ func newBreakStmt(breakToken token) *breakStmt {
 func (breakStmt *breakStmt) accept(v stmtVisitor) {
 	//TODO 分析是否在for 或者 while 内部
 	v.visitBreakStmt(breakStmt)
+}
+
+//*************** while stmt
+type whileStmt struct {
+	condition  expr
+	whileBlock stmt
+}
+
+func newWhileStmt(condition expr, whileBlock stmt) *whileStmt {
+	return &whileStmt{
+		condition:  condition,
+		whileBlock: whileBlock,
+	}
+}
+func (st *whileStmt) accept(v stmtVisitor) {
+	//TODO 分析break是否在for 或者 while 内部
+	v.visitWhileStmt(st)
 }

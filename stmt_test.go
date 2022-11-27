@@ -98,5 +98,26 @@ for var i = 0, j = 0; i < 12; i = i + 1 , j = j + 1 {
 	if sum != int64(90) {
 		t.Errorf("expect 'sum' = %d, but got %d", 90, sum)
 	}
+}
+
+func TestWhileStmt(t *testing.T) {
+	source := `
+var sum = 0, i = 0;
+while i < 20 {
+	if i >= 10 {
+		break;
+	}
+	sum = sum + i;
+	i = i + 1;
+}
+`
+	p := getParser(source)
+	statement := p.parse()
+	in := newInterpreter()
+	in.interpret(statement)
+	sum := in.current.getVariableValueRaw("sum")
+	if sum != int64(45) {
+		t.Errorf("expect 'sum' = %d, but got %d", 45, sum)
+	}
 
 }

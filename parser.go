@@ -102,6 +102,9 @@ func (p *parser) statement() stmt {
 	if nextTokType == BREAK {
 		return p.breakStmt()
 	}
+	if nextTokType == WHILE {
+		return p.whileStmt()
+	}
 	return p.expressionStmt()
 }
 
@@ -168,6 +171,13 @@ func (p *parser) breakStmt() stmt {
 	tok := p.consume(BREAK)
 	p.consume(SEMICOLON)
 	return newBreakStmt(tok)
+}
+
+func (p *parser) whileStmt() stmt {
+	p.consume(WHILE)
+	condition := p.expression()
+	block := p.blockStmt()
+	return newWhileStmt(condition, block)
 }
 
 func (p *parser) expressionStmt() stmt {
