@@ -14,4 +14,5 @@ type stmtVisitor interface {
 	visitBlockStmt(block *blockStmt)
 	visitIfStmt(ifstmt *ifStmt)
 	visitForStmt(forstmt *forStmt)
+	visitBreakStmt(breakStmt *breakStmt)
 }

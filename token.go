@@ -55,6 +55,7 @@ const (
 	WHILE  = "while"
 	FOR    = "for"
 	NIL    = "nil"
+	BREAK  = "break"
 )
 
 type token struct {
@@ -87,6 +88,7 @@ var keywords = map[tokenType]tokenType{
 	AND:    AND,
 	OR:     OR,
 	NIL:    NIL,
+	BREAK:  BREAK,
 }
 
 func toKeyword(key tokenType) (bool, tokenType) {

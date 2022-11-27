@@ -1,5 +1,12 @@
 package sky
 
+type control_code int
+
+const (
+	break_code  control_code = 1
+	return_code control_code = 1
+)
+
 type stmt interface {
 	accept(v stmtVisitor)
 }
@@ -116,4 +123,21 @@ func newForStmt(varDeclaration stmt, initializers []expr, condition expr, increm
 
 func (forst *forStmt) accept(v stmtVisitor) {
 	v.visitForStmt(forst)
+}
+
+//***************
+
+type breakStmt struct {
+	breakToken token
+}
+
+func newBreakStmt(breakToken token) *breakStmt {
+	return &breakStmt{
+		breakToken: breakToken,
+	}
+}
+
+func (breakStmt *breakStmt) accept(v stmtVisitor) {
+	//TODO 分析是否在for 或者 while 内部
+	v.visitBreakStmt(breakStmt)
 }

@@ -83,7 +83,10 @@ if x == 1 {
 func TestForStmt(t *testing.T) {
 	source := `
 var sum = 0;
-for var i = 0, j = 0; i < 10; i = i + 1 , j = j + 1 {
+for var i = 0, j = 0; i < 12; i = i + 1 , j = j + 1 {
+	if i >= 10 {
+		break;
+	}
 	sum = sum + i + j;
 }
 `

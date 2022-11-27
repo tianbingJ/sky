@@ -99,6 +99,9 @@ func (p *parser) statement() stmt {
 	if nextTokType == FOR {
 		return p.forStmt()
 	}
+	if nextTokType == BREAK {
+		return p.breakStmt()
+	}
 	return p.expressionStmt()
 }
 
@@ -159,6 +162,12 @@ func (p *parser) forStmt() stmt {
 
 	forBlock = p.blockStmt()
 	return newForStmt(varDeclaration, initializers, condition, increments, forBlock)
+}
+
+func (p *parser) breakStmt() stmt {
+	tok := p.consume(BREAK)
+	p.consume(SEMICOLON)
+	return newBreakStmt(tok)
 }
 
 func (p *parser) expressionStmt() stmt {

@@ -126,12 +126,25 @@ func (i *interpreter) visitIfStmt(ifstmt *ifStmt) {
 		}
 	}
 	//else
-	ifstmt.elseBlock.accept(i)
+	if ifstmt.elseBlock != nil {
+		ifstmt.elseBlock.accept(i)
+	}
 }
 
 func (i *interpreter) visitForStmt(forstmt *forStmt) {
 	prev := i.current
 	i.current = newSymbolTable(i.current)
+	defer func() {
+		i.current = prev
+	}()
+	defer func() {
+		v := recover()
+		if value, ok := v.(control_code); ok && value == break_code {
+			return
+		}
+		panic(v)
+	}()
+
 	if forstmt.varDeclaration != nil {
 		forstmt.varDeclaration.accept(i)
 	} else {
@@ -146,6 +159,8 @@ func (i *interpreter) visitForStmt(forstmt *forStmt) {
 			forstmt.increments[k].accept(i)
 		}
 	}
+}
 
-	i.current = prev
+func (i *interpreter) visitBreakStmt(breakStmt *breakStmt) {
+	panic(break_code)
 }
