@@ -54,5 +54,5 @@ func (s *symbolTable) getSymbolByVariable(variableName string) *symbolTable {
 	if s.prev == nil {
 		return nil
 	}
-	return s.getSymbolByVariable(variableName)
+	return s.prev.getSymbolByVariable(variableName)
 }

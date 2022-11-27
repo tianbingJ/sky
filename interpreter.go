@@ -53,10 +53,10 @@ func (i *interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
 	value := i.evaluate(expression.expression)
 	if op.tokenType == MINUS {
 		if iValue, ok := value.(int64); ok {
-			return iValue
+			return -iValue
 		}
 		if iValue, ok := value.(float64); ok {
-			return iValue
+			return -iValue
 		}
 		panic(newRuntimeError("Should be int value after '-' operator", op))
 	}
@@ -89,12 +89,63 @@ func (i *interpreter) evaluate(expression expr) interface{} {
 }
 
 func (i *interpreter) visitVarStmt(varStmt *varStmt) {
-	var value interface{}
-	if varStmt.initializer != nil {
-		value = i.evaluate(varStmt.initializer)
+	for k := 0; k < len(varStmt.elements); k++ {
+		var value interface{}
+		if varStmt.elements[k].initializer != nil {
+			value = i.evaluate(varStmt.elements[k].initializer)
+		}
+		i.current.define(varStmt.elements[k].name, value)
 	}
-	i.current.define(varStmt.name, value)
 }
+
 func (i *interpreter) visitExpressionStmt(expressionStmt *expressionStmt) {
 	i.evaluate(expressionStmt.value)
+}
+
+func (i *interpreter) visitBlockStmt(block *blockStmt) {
+	prev := i.current
+	i.current = newSymbolTable(i.current)
+	for k := 0; k < len(block.statements); k++ {
+		block.statements[k].accept(i)
+	}
+	i.current = prev
+}
+
+func (i *interpreter) visitIfStmt(ifstmt *ifStmt) {
+	ifConditionValue := i.evaluate(ifstmt.ifCondition)
+	if isTruthy(ifConditionValue) {
+		ifstmt.ifBlock.accept(i)
+		return
+	}
+	//elifs
+	for k := 0; k < len(ifstmt.elseIfs); k++ {
+		value := i.evaluate(ifstmt.elseIfs[k].condition)
+		if isTruthy(value) {
+			ifstmt.elseIfs[k].block.accept(i)
+			return
+		}
+	}
+	//else
+	ifstmt.elseBlock.accept(i)
+}
+
+func (i *interpreter) visitForStmt(forstmt *forStmt) {
+	prev := i.current
+	i.current = newSymbolTable(i.current)
+	if forstmt.varDeclaration != nil {
+		forstmt.varDeclaration.accept(i)
+	} else {
+		for k := 0; k < len(forstmt.initializers); k++ {
+			i.evaluate(forstmt.initializers[k])
+		}
+	}
+
+	for isTruthy(i.evaluate(forstmt.condition)) {
+		forstmt.forBlock.accept(i)
+		for k := 0; k < len(forstmt.increments); k++ {
+			forstmt.increments[k].accept(i)
+		}
+	}
+
+	i.current = prev
 }

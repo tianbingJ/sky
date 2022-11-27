@@ -71,18 +71,94 @@ func (p *parser) declaration() stmt {
 
 func (p *parser) varStatement() stmt {
 	p.consumeRaw()
-	name := p.consume(IDENTIFIER)
-	var initializer expr
-	if p.peek().tokenType == ASSIGN {
-		p.consume(ASSIGN)
-		initializer = p.expression()
+	elements := make([]*varElement, 0)
+	for p.peek().tokenType == IDENTIFIER {
+		name := p.consume(IDENTIFIER)
+		var initializer expr
+		if p.peek().tokenType == ASSIGN {
+			p.consume(ASSIGN)
+			initializer = p.expression()
+		}
+		elements = append(elements, newVarElement(name, initializer))
+		if p.peek().tokenType != SEMICOLON {
+			p.consume(COMMA)
+		}
 	}
 	p.consume(SEMICOLON)
-	return newVarStmt(name, initializer)
+	return newVarStmt(elements)
 }
 
 func (p *parser) statement() stmt {
+	nextTokType := p.peek().tokenType
+	if nextTokType == LBRACE {
+		return p.blockStmt()
+	}
+	if nextTokType == IF {
+		return p.ifStmt()
+	}
+	if nextTokType == FOR {
+		return p.forStmt()
+	}
 	return p.expressionStmt()
+}
+
+func (p *parser) blockStmt() stmt {
+	p.consume(LBRACE)
+	stmts := make([]stmt, 0)
+	for p.peek().tokenType != EOF && p.peek().tokenType != RBRACE {
+		stmts = append(stmts, p.declaration())
+	}
+	p.consume(RBRACE)
+	return newBlockStmt(stmts)
+}
+
+//if condition
+func (p *parser) ifStmt() stmt {
+	p.consumeRaw()
+	ifCondition := p.expression()
+	ifBlock := p.blockStmt()
+	elseIfs := make([]*elseIfconditionBlock, 0)
+	for p.peek().tokenType == ELIF {
+		p.consumeRaw()
+		condition := p.expression()
+		block := p.blockStmt()
+		elseIfs = append(elseIfs, newElseIfConditionBlock(condition, block))
+	}
+	var elseBlock stmt
+	if p.peek().tokenType == ELSE {
+		p.consumeRaw()
+		elseBlock = p.blockStmt()
+	}
+	return newIfStmt(ifCondition, ifBlock, elseIfs, elseBlock)
+}
+
+func (p *parser) forStmt() stmt {
+	p.consumeRaw()
+	var varDeclaration stmt
+	var initializers []expr
+	var condition expr
+	var forBlock stmt
+	var increments []expr
+	if p.peek().tokenType == VAR {
+		varDeclaration = p.varStatement()
+	} else {
+		for p.peek().tokenType != SEMICOLON {
+			initializers = append(initializers, p.expression())
+			p.consume(COMMA)
+		}
+	}
+	condition = p.expression()
+	p.consume(SEMICOLON)
+
+	for p.peek().tokenType != LBRACE {
+		if len(increments) != 0 {
+			p.consume(COMMA)
+		}
+		increments = append(increments, p.expression())
+	}
+
+	forBlock = p.blockStmt()
+	return newForStmt(varDeclaration, initializers, condition, increments, forBlock)
 }
 
 func (p *parser) expressionStmt() stmt {

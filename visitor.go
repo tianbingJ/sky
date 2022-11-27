@@ -11,4 +11,7 @@ type exprVisitor interface {
 type stmtVisitor interface {
 	visitVarStmt(varStmt *varStmt)
 	visitExpressionStmt(expressionStmt *expressionStmt)
+	visitBlockStmt(block *blockStmt)
+	visitIfStmt(ifstmt *ifStmt)
+	visitForStmt(forstmt *forStmt)
 }
