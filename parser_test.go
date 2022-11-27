@@ -65,30 +65,6 @@ func TestAdd(t *testing.T) {
 	assert(t, leftRoot.operator.tokenType == PLUS, "left association, left root should be PLUS")
 }
 
-//test right association
-func TestAssign(t *testing.T) {
-	s := `a = b = 1 ^ 2`
-	//		a
-	//  		b
-	//			  (+ 1 2)
-	p := getParser(s)
-	exp := p.assign()
-	exprRoot, ok := exp.(*assignExpr)
-	if !ok {
-		t.Errorf("result is not assign expression.")
-	}
-	assert(t, exprRoot.name.tokenType == IDENTIFIER, "")
-	assert(t, exprRoot.name.lexeme == "a", "")
-	if !ok {
-		t.Errorf("result is not assign expression.")
-	}
-
-	nextExpr, ok := exprRoot.expr.(*assignExpr)
-	assert(t, nextExpr.name.tokenType == IDENTIFIER, "")
-	assert(t, nextExpr.name.lexeme == "b", "")
-
-}
-
 //test precedence
 func TestAddAndMultiply(t *testing.T) {
 	s := `1 * 2 - 3 % 5`

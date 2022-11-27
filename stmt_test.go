@@ -14,10 +14,10 @@ func TestVarStmt(t *testing.T) {
 	valueA := in.current.getVariableValueRaw("a")
 	valueX := in.current.getVariableValueRaw("x")
 	if !numberEquals(valueA, int64(1)) {
-		t.Errorf("var not assign to varible effective, value should be 1, got %v", valueA)
+		t.Errorf("var not assign to varible effective, valueExpr should be 1, got %v", valueA)
 	}
 	if valueX != "string" {
-		t.Errorf("var not assign to varible effective, value should be 'string', got %v", valueX)
+		t.Errorf("var not assign to varible effective, valueExpr should be 'string', got %v", valueX)
 	}
 }
 
@@ -42,13 +42,13 @@ r3 = a;
 	value2 := in.current.getVariableValueRaw("r2")
 	value3 := in.current.getVariableValueRaw("r3")
 	if !numberEquals(value1, int64(1)) {
-		t.Errorf("var not assign to varible effective, value should be 1, got %v", value1)
+		t.Errorf("var not assign to varible effective, valueExpr should be 1, got %v", value1)
 	}
 	if !numberEquals(value2, int64(2)) {
-		t.Errorf("var not assign to varible effective, value should be 2, got %v", value2)
+		t.Errorf("var not assign to varible effective, valueExpr should be 2, got %v", value2)
 	}
 	if !numberEquals(value3, int64(1)) {
-		t.Errorf("var not assign to varible effective, value should be 1, got %v", value3)
+		t.Errorf("var not assign to varible effective, valueExpr should be 1, got %v", value3)
 	}
 }
 
@@ -83,7 +83,7 @@ if x == 1 {
 func TestForStmt(t *testing.T) {
 	source := `
 var sum = 0;
-for var i , j = 0, 0; i < 12; i = i + 1 , j = j + 1 {
+for var i , j = 0, 0; i < 12; i , j = i + 1 , j + 1 {
 	if i >= 10 {
 		break;
 	}

@@ -40,7 +40,7 @@ func evaluateBinary(operator token, left, right interface{}) interface{} {
 
 		//shift operator right expression should >= 0
 		if irvalue < 0 {
-			panic(newRuntimeError("right value should not be negative", operator))
+			panic(newRuntimeError("right valueExpr should not be negative", operator))
 		}
 		switch operator.tokenType {
 		case LSHIFT:
@@ -205,6 +205,6 @@ func bothNumbers(left, right interface{}) bool {
 func checkBothNumbers(left, right interface{}, operator token) {
 	bothNumber := bothNumbers(left, right)
 	if !bothNumber {
-		panic(newRuntimeError("both value should be numbers", operator))
+		panic(newRuntimeError("both valueExpr should be numbers", operator))
 	}
 }

@@ -71,20 +71,3 @@ func newVariableExpr(tok token) *variableExpr {
 func (u *variableExpr) accept(v exprVisitor) interface{} {
 	return v.visitVariableExpr(u)
 }
-
-//*********** assign expr
-type assignExpr struct {
-	name token
-	expr expr
-}
-
-func newAssignExpr(tok token, exp expr) *assignExpr {
-	return &assignExpr{
-		name: tok,
-		expr: exp,
-	}
-}
-
-func (as *assignExpr) accept(v exprVisitor) interface{} {
-	return v.visitAssignExpr(as)
-}

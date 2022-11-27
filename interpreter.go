@@ -58,13 +58,13 @@ func (i *interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
 		if iValue, ok := value.(float64); ok {
 			return -iValue
 		}
-		panic(newRuntimeError("Should be int value after '-' operator", op))
+		panic(newRuntimeError("Should be int valueExpr after '-' operator", op))
 	}
 	//bang
 	if bValue, ok := value.(bool); ok {
 		return !bValue
 	}
-	panic(newRuntimeError("Shoule be bool value after '!' operator", op))
+	panic(newRuntimeError("Shoule be bool valueExpr after '!' operator", op))
 }
 
 func (i *interpreter) visitLiteralExpr(expression *literalExpr) interface{} {
@@ -75,15 +75,6 @@ func (i *interpreter) visitVariableExpr(expression *variableExpr) interface{} {
 	return i.current.getVariableValue(expression.token)
 }
 
-func (i *interpreter) visitAssignExpr(expression *assignExpr) interface{} {
-	var value interface{}
-	if expression.expr != nil {
-		value = i.evaluate(expression.expr)
-	}
-	i.current.assign(expression.name, value)
-	return value
-}
-
 func (i *interpreter) evaluate(expression expr) interface{} {
 	return expression.accept(i)
 }
@@ -91,8 +82,8 @@ func (i *interpreter) evaluate(expression expr) interface{} {
 func (i *interpreter) visitVarStmt(varStmt *varStmt) {
 	for k := 0; k < len(varStmt.elements); k++ {
 		var value interface{}
-		if varStmt.elements[k].initializer != nil {
-			value = i.evaluate(varStmt.elements[k].initializer)
+		if varStmt.elements[k].valueExpr != nil {
+			value = i.evaluate(varStmt.elements[k].valueExpr)
 		}
 		i.current.define(varStmt.elements[k].name, value)
 	}
@@ -150,16 +141,12 @@ func (i *interpreter) visitForStmt(forstmt *forStmt) {
 	if forstmt.varDeclaration != nil {
 		forstmt.varDeclaration.accept(i)
 	} else {
-		for k := 0; k < len(forstmt.initializers); k++ {
-			i.evaluate(forstmt.initializers[k])
-		}
+		forstmt.initializers.accept(i)
 	}
 
 	for isTruthy(i.evaluate(forstmt.condition)) {
 		forstmt.forBlock.accept(i)
-		for k := 0; k < len(forstmt.increments); k++ {
-			forstmt.increments[k].accept(i)
-		}
+		forstmt.increments.accept(i)
 	}
 }
 
@@ -182,5 +169,19 @@ func (i *interpreter) visitWhileStmt(st *whileStmt) {
 	}()
 	for isTruthy(st.condition) {
 		st.whileBlock.accept(i)
+	}
+}
+
+func (i *interpreter) visitAssignStmt(st *assignStmt) {
+	for k := 0; k < len(st.elements); k++ {
+		name := st.elements[k].name
+		valueExpr := st.elements[k].valueExpr
+		var value interface{}
+		if valueExpr != nil {
+			value = i.evaluate(valueExpr)
+		} else {
+			value = nil
+		}
+		i.current.assign(name, value)
 	}
 }

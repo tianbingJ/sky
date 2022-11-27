@@ -12,22 +12,22 @@ type stmt interface {
 
 //*************** var stmt
 type varStmt struct {
-	elements []*varElement
+	elements []*assignElement
 }
 
-type varElement struct {
-	name        token
-	initializer expr
+type assignElement struct {
+	name      token
+	valueExpr expr
 }
 
-func newVarElement(name token, initializer expr) *varElement {
-	return &varElement{
-		name:        name,
-		initializer: initializer,
+func newVarElement(name token, initializer expr) *assignElement {
+	return &assignElement{
+		name:      name,
+		valueExpr: initializer,
 	}
 }
 
-func newVarStmt(elements []*varElement) stmt {
+func newVarStmt(elements []*assignElement) stmt {
 	return &varStmt{
 		elements: elements,
 	}
@@ -104,18 +104,18 @@ func (ifSt *ifStmt) accept(v stmtVisitor) {
 type forStmt struct {
 	// varDeclaration and initializers cannot both be set
 	varDeclaration stmt
-	initializers   []expr
+	initializers   *assignStmt
 	condition      expr
-	increments     []expr
+	increments     *assignStmt
 	forBlock       stmt
 }
 
-func newForStmt(varDeclaration stmt, initializers []expr, condition expr, increments []expr, forBlock stmt) stmt {
+func newForStmt(varDeclaration stmt, initializers *assignStmt, condition expr, incr *assignStmt, forBlock stmt) *forStmt {
 	return &forStmt{
 		varDeclaration: varDeclaration,
 		initializers:   initializers,
 		condition:      condition,
-		increments:     increments,
+		increments:     incr,
 		forBlock:       forBlock,
 	}
 }
@@ -156,4 +156,19 @@ func newWhileStmt(condition expr, whileBlock stmt) *whileStmt {
 func (st *whileStmt) accept(v stmtVisitor) {
 	//TODO 分析break是否在for 或者 while 内部
 	v.visitWhileStmt(st)
+}
+
+//**************** assign stmt
+type assignStmt struct {
+	elements []*assignElement
+}
+
+func newAssignStmt(elements []*assignElement) *assignStmt {
+	return &assignStmt{
+		elements: elements,
+	}
+}
+
+func (st *assignStmt) accept(v stmtVisitor) {
+	v.visitAssignStmt(st)
 }

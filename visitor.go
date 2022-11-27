@@ -5,7 +5,6 @@ type exprVisitor interface {
 	visitUnaryExpr(expression *unaryExpr) interface{}
 	visitLiteralExpr(expression *literalExpr) interface{}
 	visitVariableExpr(expression *variableExpr) interface{}
-	visitAssignExpr(expression *assignExpr) interface{}
 }
 
 type stmtVisitor interface {
@@ -16,4 +15,5 @@ type stmtVisitor interface {
 	visitForStmt(forstmt *forStmt)
 	visitBreakStmt(breakStmt *breakStmt)
 	visitWhileStmt(whileStmt *whileStmt)
+	visitAssignStmt(assign *assignStmt)
 }

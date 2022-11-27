@@ -40,6 +40,13 @@ func (p *parser) peek() token {
 	return p.tokens[p.current]
 }
 
+func (p *parser) peekTwoTokenType() tokenType {
+	if p.current+1 >= len(p.tokens) {
+		return EOF
+	}
+	return p.tokens[p.current+1].tokenType
+}
+
 func (p *parser) previous() token {
 	return p.tokens[p.current-1]
 }
@@ -72,7 +79,13 @@ func (p *parser) declaration() stmt {
 // var x, y = 1, 2
 func (p *parser) varStatement() stmt {
 	p.consumeRaw()
-	elements := make([]*varElement, 0)
+	elements := p.parseAssignElement()
+	p.consume(SEMICOLON)
+	return newVarStmt(elements)
+}
+
+func (p *parser) parseAssignElement() []*assignElement {
+	elements := make([]*assignElement, 0)
 
 	//identifier part
 	name := p.consume(IDENTIFIER)
@@ -85,18 +98,16 @@ func (p *parser) varStatement() stmt {
 	}
 	if p.peek().tokenType == ASSIGN {
 		p.consume(ASSIGN)
-		elements[0].initializer = p.expression()
+		elements[0].valueExpr = p.expression()
 		for k := 1; p.peek().tokenType == COMMA; k++ {
 			if k >= len(elements) {
 				panic(newSyntaxError(" expression number is too more", p.peek()))
 			}
 			p.consume(COMMA)
-			elements[k].initializer = p.expression()
+			elements[k].valueExpr = p.expression()
 		}
 	}
-
-	p.consume(SEMICOLON)
-	return newVarStmt(elements)
+	return elements
 }
 
 func (p *parser) statement() stmt {
@@ -116,7 +127,18 @@ func (p *parser) statement() stmt {
 	if nextTokType == WHILE {
 		return p.whileStmt()
 	}
+	if nextTokType == IDENTIFIER && (p.peekTwoTokenType() == COMMA || p.peekTwoTokenType() == ASSIGN) {
+		return p.assignStmt(true)
+	}
 	return p.expressionStmt()
+}
+
+func (p *parser) assignStmt(consumeSemicolon bool) *assignStmt {
+	elements := p.parseAssignElement()
+	if consumeSemicolon {
+		p.consume(SEMICOLON)
+	}
+	return newAssignStmt(elements)
 }
 
 func (p *parser) blockStmt() stmt {
@@ -149,29 +171,23 @@ func (p *parser) ifStmt() stmt {
 	return newIfStmt(ifCondition, ifBlock, elseIfs, elseBlock)
 }
 
-func (p *parser) forStmt() stmt {
+func (p *parser) forStmt() *forStmt {
 	p.consumeRaw()
 	var varDeclaration stmt
-	var initializers []expr
+	var initializers *assignStmt
 	var condition expr
 	var forBlock stmt
-	var increments []expr
+	var increments *assignStmt
 	if p.peek().tokenType == VAR {
 		varDeclaration = p.varStatement()
-	} else {
-		for p.peek().tokenType != SEMICOLON {
-			initializers = append(initializers, p.expression())
-			p.consume(COMMA)
-		}
+	} else if p.peek().tokenType != SEMICOLON {
+		initializers = p.assignStmt(true)
 	}
 	condition = p.expression()
 	p.consume(SEMICOLON)
 
-	for p.peek().tokenType != LBRACE {
-		if len(increments) != 0 {
-			p.consume(COMMA)
-		}
-		increments = append(increments, p.expression())
+	if p.peek().tokenType != LBRACE {
+		increments = p.assignStmt(false)
 	}
 
 	forBlock = p.blockStmt()
@@ -198,22 +214,7 @@ func (p *parser) expressionStmt() stmt {
 }
 
 func (p *parser) expression() expr {
-	return p.assign()
-}
-
-func (p *parser) assign() expr {
-	left := p.andOr()
-	nextType := p.peek().tokenType
-	if nextType == ASSIGN {
-		name, ok := left.(*variableExpr)
-		if !ok {
-			panic(newSyntaxError("should be variable before '='", p.peek()))
-		}
-		p.consumeRaw()
-		right := p.assign()
-		return newAssignExpr(name.token, right)
-	}
-	return left
+	return p.andOr()
 }
 
 func (p *parser) andOr() expr {
