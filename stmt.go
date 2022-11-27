@@ -3,8 +3,7 @@ package sky
 type control_code int
 
 const (
-	break_code  control_code = 1
-	return_code control_code = 1
+	break_code control_code = 1
 )
 
 type stmt interface {

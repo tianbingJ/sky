@@ -69,21 +69,32 @@ func (p *parser) declaration() stmt {
 	return p.statement()
 }
 
+// var x, y = 1, 2
 func (p *parser) varStatement() stmt {
 	p.consumeRaw()
 	elements := make([]*varElement, 0)
-	for p.peek().tokenType == IDENTIFIER {
-		name := p.consume(IDENTIFIER)
-		var initializer expr
-		if p.peek().tokenType == ASSIGN {
-			p.consume(ASSIGN)
-			initializer = p.expression()
-		}
-		elements = append(elements, newVarElement(name, initializer))
-		if p.peek().tokenType != SEMICOLON {
+
+	//identifier part
+	name := p.consume(IDENTIFIER)
+	elements = append(elements, newVarElement(name, nil))
+
+	for p.peek().tokenType == COMMA {
+		p.consumeRaw()
+		name = p.consume(IDENTIFIER)
+		elements = append(elements, newVarElement(name, nil))
+	}
+	if p.peek().tokenType == ASSIGN {
+		p.consume(ASSIGN)
+		elements[0].initializer = p.expression()
+		for k := 1; p.peek().tokenType == COMMA; k++ {
+			if k >= len(elements) {
+				panic(newSyntaxError(" expression number is too more", p.peek()))
+			}
 			p.consume(COMMA)
+			elements[k].initializer = p.expression()
 		}
 	}
+
 	p.consume(SEMICOLON)
 	return newVarStmt(elements)
 }

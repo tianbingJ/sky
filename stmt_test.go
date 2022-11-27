@@ -6,7 +6,7 @@ import (
 )
 
 func TestVarStmt(t *testing.T) {
-	source := `var a = 1, x = "string";`
+	source := `var a, x = 1, "string";`
 	p := getParser(source)
 	statement := p.parse()
 	in := newInterpreter()
@@ -83,7 +83,7 @@ if x == 1 {
 func TestForStmt(t *testing.T) {
 	source := `
 var sum = 0;
-for var i = 0, j = 0; i < 12; i = i + 1 , j = j + 1 {
+for var i , j = 0, 0; i < 12; i = i + 1 , j = j + 1 {
 	if i >= 10 {
 		break;
 	}
@@ -102,7 +102,7 @@ for var i = 0, j = 0; i < 12; i = i + 1 , j = j + 1 {
 
 func TestWhileStmt(t *testing.T) {
 	source := `
-var sum = 0, i = 0;
+var sum , i = 0, 0;
 while i < 20 {
 	if i >= 10 {
 		break;
@@ -119,5 +119,4 @@ while i < 20 {
 	if sum != int64(45) {
 		t.Errorf("expect 'sum' = %d, but got %d", 45, sum)
 	}
-
 }
