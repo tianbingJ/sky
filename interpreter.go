@@ -77,7 +77,7 @@ func (i *Interpreter) visitCallExpr(expression *callExpr) interface{} {
 	for k := 0; k < len(expression.arguments); k++ {
 		arguments = append(arguments, i.evaluate(expression.arguments[k]))
 	}
-	return i.call(f, arguments)
+	return f.call(i, arguments)
 }
 
 func (i *Interpreter) call(f *function, arguments []interface{}) (ret interface{}) {

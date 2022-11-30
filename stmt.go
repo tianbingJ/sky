@@ -42,7 +42,7 @@ type expressionStmt struct {
 	value expr
 }
 
-func newExpressionStmt(value expr) stmt {
+func newExpressionStmt(value expr) *expressionStmt {
 	return &expressionStmt{
 		value: value,
 	}

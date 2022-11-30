@@ -244,7 +244,7 @@ func (p *parser) whileStmt() stmt {
 	return newWhileStmt(condition, block)
 }
 
-func (p *parser) expressionStmt() stmt {
+func (p *parser) expressionStmt() *expressionStmt {
 	value := p.expression()
 	p.consume(SEMICOLON)
 	return newExpressionStmt(value)

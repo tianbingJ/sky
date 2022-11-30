@@ -127,8 +127,8 @@ var sum = 0;
 func add(x, y) {
 	return x + y;
 }
-sum = add(1 , 2);
-
+var f = add;
+sum = f(1 , 2);
 `
 	p := getParser(source)
 	statement := p.Parse()
