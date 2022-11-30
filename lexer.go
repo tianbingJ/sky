@@ -22,7 +22,7 @@ func NewLexer(source string) *lexer {
 	return l
 }
 
-func (l *lexer) parse() []token {
+func (l *lexer) Parse() []token {
 	r := make([]token, 0)
 	var tok token
 	for tok = l.nextToken(); tok.tokenType != EOF; tok = l.nextToken() {

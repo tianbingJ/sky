@@ -57,7 +57,7 @@ type blockStmt struct {
 	statements []stmt
 }
 
-func newBlockStmt(statements []stmt) stmt {
+func newBlockStmt(statements []stmt) *blockStmt {
 	return &blockStmt{
 		statements: statements,
 	}
@@ -171,4 +171,40 @@ func newAssignStmt(elements []*assignElement) *assignStmt {
 
 func (st *assignStmt) accept(v stmtVisitor) {
 	v.visitAssignStmt(st)
+}
+
+//************* function stmt
+type functionStmt struct {
+	name   token
+	params []token
+	body   *blockStmt
+}
+
+func newFunctionStmt(name token, params []token, body *blockStmt) *functionStmt {
+	return &functionStmt{
+		name:   name,
+		params: params,
+		body:   body,
+	}
+}
+
+func (funcStmt *functionStmt) accept(v stmtVisitor) {
+	v.visitFunctionStmt(funcStmt)
+}
+
+//************** return stmt
+type returnStmt struct {
+	token      token
+	expression expr
+}
+
+func newReturnStmt(tok token, expression expr) *returnStmt {
+	return &returnStmt{
+		token:      tok,
+		expression: expression,
+	}
+}
+
+func (retStmt *returnStmt) accept(v stmtVisitor) {
+	v.visitReturnStmt(retStmt)
 }

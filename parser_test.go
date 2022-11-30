@@ -94,6 +94,6 @@ func TestAddAndMultiply(t *testing.T) {
 
 func getParser(source string) *parser {
 	l := NewLexer(source)
-	tokens := l.parse()
-	return newParser(tokens)
+	tokens := l.Parse()
+	return NewParser(tokens)
 }

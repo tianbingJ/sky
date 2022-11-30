@@ -1,25 +1,25 @@
 package sky
 
-type interpreter struct {
-	global  *symbolTable
-	current *symbolTable
+type Interpreter struct {
+	globalSymbolTable  *symbolTable
+	currentSymbolTable *symbolTable
 }
 
-func newInterpreter() *interpreter {
+func NewInterpreter() *Interpreter {
 	globalTable := newSymbolTable(nil)
-	return &interpreter{
-		global:  globalTable,
-		current: globalTable,
+	return &Interpreter{
+		globalSymbolTable:  globalTable,
+		currentSymbolTable: globalTable,
 	}
 }
 
-func (i *interpreter) interpret(statements []stmt) {
+func (i *Interpreter) Interpret(statements []stmt) {
 	for k := 0; k < len(statements); k++ {
 		statements[k].accept(i)
 	}
 }
 
-func (i *interpreter) interpretExpression(exprs []expr) []interface{} {
+func (i *Interpreter) interpretExpression(exprs []expr) []interface{} {
 	r := make([]interface{}, 0)
 	for idx := 0; idx < len(exprs); idx++ {
 		r = append(r, exprs[idx].accept(i))
@@ -27,7 +27,7 @@ func (i *interpreter) interpretExpression(exprs []expr) []interface{} {
 	return r
 }
 
-func (i *interpreter) visitBinaryExpr(expression *binaryExpr) interface{} {
+func (i *Interpreter) visitBinaryExpr(expression *binaryExpr) interface{} {
 	op := expression.operator
 	left := i.evaluate(expression.left)
 	if op.tokenType == OR {
@@ -48,7 +48,7 @@ func (i *interpreter) visitBinaryExpr(expression *binaryExpr) interface{} {
 }
 
 //! -
-func (i *interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
+func (i *Interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
 	op := expression.token
 	value := i.evaluate(expression.expression)
 	if op.tokenType == MINUS {
@@ -67,44 +67,84 @@ func (i *interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
 	panic(newRuntimeError("Shoule be bool valueExpr after '!' operator", op))
 }
 
-func (i *interpreter) visitLiteralExpr(expression *literalExpr) interface{} {
+func (i *Interpreter) visitCallExpr(expression *callExpr) interface{} {
+	callee := i.evaluate(expression.callee)
+	f, isFunction := callee.(*function)
+	if !isFunction {
+		panic(newRuntimeError("expression cannot be called", expression.paren))
+	}
+	arguments := make([]interface{}, 0)
+	for k := 0; k < len(expression.arguments); k++ {
+		arguments = append(arguments, i.evaluate(expression.arguments[k]))
+	}
+	return i.call(f, arguments)
+}
+
+func (i *Interpreter) call(f *function, arguments []interface{}) (ret interface{}) {
+	//return value
+	defer func() {
+		v := recover()
+		if returnValue, ok := v.(*returnV); ok {
+			ret = returnValue.value
+			return
+		}
+		panic(v)
+	}()
+
+	previous := i.currentSymbolTable
+	defer func() {
+		i.currentSymbolTable = previous
+	}()
+
+	//use the symbols where the function is declared, use closure environment
+	i.currentSymbolTable = newSymbolTable(f.symbols)
+
+	for k := 0; k < len(arguments); k++ {
+		i.currentSymbolTable.define(f.declaration.params[k], arguments[k])
+	}
+
+	i.visitBlockStmt(f.declaration.body)
+	return ret
+}
+
+func (i *Interpreter) visitLiteralExpr(expression *literalExpr) interface{} {
 	return expression.value
 }
 
-func (i *interpreter) visitVariableExpr(expression *variableExpr) interface{} {
-	return i.current.getVariableValue(expression.token)
+func (i *Interpreter) visitVariableExpr(expression *variableExpr) interface{} {
+	return i.currentSymbolTable.getVariableValue(expression.token)
 }
 
-func (i *interpreter) evaluate(expression expr) interface{} {
+func (i *Interpreter) evaluate(expression expr) interface{} {
 	return expression.accept(i)
 }
 
-func (i *interpreter) visitVarStmt(varStmt *varStmt) {
+func (i *Interpreter) visitVarStmt(varStmt *varStmt) {
 	for k := 0; k < len(varStmt.elements); k++ {
 		var value interface{}
 		if varStmt.elements[k].valueExpr != nil {
 			value = i.evaluate(varStmt.elements[k].valueExpr)
 		}
-		i.current.define(varStmt.elements[k].name, value)
+		i.currentSymbolTable.define(varStmt.elements[k].name, value)
 	}
 }
 
-func (i *interpreter) visitExpressionStmt(expressionStmt *expressionStmt) {
+func (i *Interpreter) visitExpressionStmt(expressionStmt *expressionStmt) {
 	i.evaluate(expressionStmt.value)
 }
 
-func (i *interpreter) visitBlockStmt(block *blockStmt) {
-	prev := i.current
+func (i *Interpreter) visitBlockStmt(block *blockStmt) {
+	prev := i.currentSymbolTable
 	defer func() {
-		i.current = prev
+		i.currentSymbolTable = prev
 	}()
-	i.current = newSymbolTable(i.current)
+	i.currentSymbolTable = newSymbolTable(i.currentSymbolTable)
 	for k := 0; k < len(block.statements); k++ {
 		block.statements[k].accept(i)
 	}
 }
 
-func (i *interpreter) visitIfStmt(ifstmt *ifStmt) {
+func (i *Interpreter) visitIfStmt(ifstmt *ifStmt) {
 	ifConditionValue := i.evaluate(ifstmt.ifCondition)
 	if isTruthy(ifConditionValue) {
 		ifstmt.ifBlock.accept(i)
@@ -124,11 +164,11 @@ func (i *interpreter) visitIfStmt(ifstmt *ifStmt) {
 	}
 }
 
-func (i *interpreter) visitForStmt(forstmt *forStmt) {
-	prev := i.current
-	i.current = newSymbolTable(i.current)
+func (i *Interpreter) visitForStmt(forstmt *forStmt) {
+	prev := i.currentSymbolTable
+	i.currentSymbolTable = newSymbolTable(i.currentSymbolTable)
 	defer func() {
-		i.current = prev
+		i.currentSymbolTable = prev
 	}()
 	defer func() {
 		v := recover()
@@ -150,15 +190,15 @@ func (i *interpreter) visitForStmt(forstmt *forStmt) {
 	}
 }
 
-func (i *interpreter) visitBreakStmt(breakStmt *breakStmt) {
+func (i *Interpreter) visitBreakStmt(breakStmt *breakStmt) {
 	panic(break_code)
 }
 
-func (i *interpreter) visitWhileStmt(st *whileStmt) {
-	prev := i.current
-	i.current = newSymbolTable(i.current)
+func (i *Interpreter) visitWhileStmt(st *whileStmt) {
+	prev := i.currentSymbolTable
+	i.currentSymbolTable = newSymbolTable(i.currentSymbolTable)
 	defer func() {
-		i.current = prev
+		i.currentSymbolTable = prev
 	}()
 	defer func() {
 		v := recover()
@@ -172,7 +212,7 @@ func (i *interpreter) visitWhileStmt(st *whileStmt) {
 	}
 }
 
-func (i *interpreter) visitAssignStmt(st *assignStmt) {
+func (i *Interpreter) visitAssignStmt(st *assignStmt) {
 	for k := 0; k < len(st.elements); k++ {
 		name := st.elements[k].name
 		valueExpr := st.elements[k].valueExpr
@@ -182,6 +222,19 @@ func (i *interpreter) visitAssignStmt(st *assignStmt) {
 		} else {
 			value = nil
 		}
-		i.current.assign(name, value)
+		i.currentSymbolTable.assign(name, value)
 	}
+}
+
+func (i *Interpreter) visitFunctionStmt(funcStmt *functionStmt) {
+	f := newFunction(funcStmt, i.currentSymbolTable)
+	i.currentSymbolTable.define(funcStmt.name, f)
+}
+
+func (i *Interpreter) visitReturnStmt(funcStmt *returnStmt) {
+	if funcStmt.expression != nil {
+		v := i.evaluate(funcStmt.expression)
+		panic(newReturnV(v))
+	}
+	panic(newReturnV(nil))
 }

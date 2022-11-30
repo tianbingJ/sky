@@ -13,7 +13,7 @@ type tokenTest struct {
 
 func doTest(source string, expected []tokenTest, ignoreLine, ignoreColumn bool, t *testing.T) {
 	l := NewLexer(source)
-	tokens := l.parse()
+	tokens := l.Parse()
 	expected = append(expected, tokenTest{
 		expectedTokenType: EOF,
 		expectedLexeme:    EOF,

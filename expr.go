@@ -71,3 +71,22 @@ func newVariableExpr(tok token) *variableExpr {
 func (u *variableExpr) accept(v exprVisitor) interface{} {
 	return v.visitVariableExpr(u)
 }
+
+//********** call expr
+type callExpr struct {
+	callee    expr
+	paren     token
+	arguments []expr
+}
+
+func newCallExpr(callee expr, paren token, arguments []expr) *callExpr {
+	return &callExpr{
+		callee:    callee,
+		paren:     paren,
+		arguments: arguments,
+	}
+}
+
+func (call *callExpr) accept(v exprVisitor) interface{} {
+	return v.visitCallExpr(call)
+}

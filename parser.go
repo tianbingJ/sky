@@ -7,7 +7,7 @@ type parser struct {
 	current int //指向下一个token
 }
 
-func newParser(tokens []token) *parser {
+func NewParser(tokens []token) *parser {
 	return &parser{
 		tokens:  tokens,
 		current: 0,
@@ -60,7 +60,7 @@ func (p *parser) consume(tokType tokenType) token {
 	return p.previous()
 }
 
-func (p *parser) parse() []stmt {
+func (p *parser) Parse() []stmt {
 	stmts := make([]stmt, 0)
 	for !p.atEnd() {
 		stmts = append(stmts, p.declaration())
@@ -73,6 +73,9 @@ func (p *parser) declaration() stmt {
 	if nextTokType == VAR {
 		return p.varStatement()
 	}
+	if nextTokType == FUNC {
+		return p.functionStmt()
+	}
 	return p.statement()
 }
 
@@ -82,6 +85,23 @@ func (p *parser) varStatement() stmt {
 	elements := p.parseAssignElement()
 	p.consume(SEMICOLON)
 	return newVarStmt(elements)
+}
+
+func (p *parser) functionStmt() stmt {
+	p.consume(FUNC)
+	name := p.consume(IDENTIFIER)
+	p.consume(LPAREN)
+	params := make([]token, 0)
+
+	for p.peek().tokenType != RPAREN {
+		if len(params) > 0 {
+			p.consume(COMMA)
+		}
+		params = append(params, p.consume(IDENTIFIER))
+	}
+	p.consume(RPAREN)
+	block := p.blockStmt()
+	return newFunctionStmt(name, params, block)
 }
 
 func (p *parser) parseAssignElement() []*assignElement {
@@ -99,12 +119,16 @@ func (p *parser) parseAssignElement() []*assignElement {
 	if p.peek().tokenType == ASSIGN {
 		p.consume(ASSIGN)
 		elements[0].valueExpr = p.expression()
-		for k := 1; p.peek().tokenType == COMMA; k++ {
+		k := 1
+		for ; p.peek().tokenType == COMMA; k++ {
 			if k >= len(elements) {
-				panic(newSyntaxError(" expression number is too more", p.peek()))
+				panic(newSyntaxError(" assign expression number is more than variables.", p.peek()))
 			}
 			p.consume(COMMA)
 			elements[k].valueExpr = p.expression()
+		}
+		if k < len(elements) {
+			panic(newSyntaxError(" assign expression number is less than variables", p.peek()))
 		}
 	}
 	return elements
@@ -130,7 +154,20 @@ func (p *parser) statement() stmt {
 	if nextTokType == IDENTIFIER && (p.peekTwoTokenType() == COMMA || p.peekTwoTokenType() == ASSIGN) {
 		return p.assignStmt(true)
 	}
+	if nextTokType == RETURN {
+		return p.returnStmt()
+	}
 	return p.expressionStmt()
+}
+
+func (p *parser) returnStmt() *returnStmt {
+	tok := p.consumeRaw()
+	var expression expr
+	if p.peek().tokenType != SEMICOLON {
+		expression = p.expression()
+	}
+	p.consume(SEMICOLON)
+	return newReturnStmt(tok, expression)
 }
 
 func (p *parser) assignStmt(consumeSemicolon bool) *assignStmt {
@@ -141,7 +178,7 @@ func (p *parser) assignStmt(consumeSemicolon bool) *assignStmt {
 	return newAssignStmt(elements)
 }
 
-func (p *parser) blockStmt() stmt {
+func (p *parser) blockStmt() *blockStmt {
 	p.consume(LBRACE)
 	stmts := make([]stmt, 0)
 	for p.peek().tokenType != EOF && p.peek().tokenType != RBRACE {
@@ -299,7 +336,32 @@ func (p *parser) unary() expr {
 		expression := p.unary()
 		return newUnaryExpr(tok, expression)
 	}
-	return p.primary()
+	return p.call()
+}
+
+//f(1)(2)
+func (p *parser) call() expr {
+	expression := p.primary()
+	for p.peek().tokenType == LPAREN {
+		expression = p.finishCall(expression)
+	}
+	return expression
+}
+
+func (p *parser) finishCall(callee expr) expr {
+	p.consume(LPAREN)
+	arguments := make([]expr, 0)
+	for p.peek().tokenType != RPAREN {
+		if len(arguments) > 0 {
+			p.consume(COMMA)
+		}
+		arguments = append(arguments, p.expression())
+		if len(arguments) >= 255 {
+			panic(newSyntaxError("too many arguments", p.previous()))
+		}
+	}
+	paren := p.consume(RPAREN)
+	return newCallExpr(callee, paren, arguments)
 }
 
 func (p *parser) primary() expr {

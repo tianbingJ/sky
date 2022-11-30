@@ -55,7 +55,7 @@ func doTestArith(t *testing.T, tests []exprTest) {
 		exprs = append(exprs, p.expression())
 	}
 
-	i := newInterpreter()
+	i := NewInterpreter()
 	results := i.interpretExpression(exprs)
 
 	if len(results) != len(tests) {

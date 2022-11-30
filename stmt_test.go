@@ -8,11 +8,11 @@ import (
 func TestVarStmt(t *testing.T) {
 	source := `var a, x = 1, "string";`
 	p := getParser(source)
-	statement := p.parse()
-	in := newInterpreter()
-	in.interpret(statement)
-	valueA := in.current.getVariableValueRaw("a")
-	valueX := in.current.getVariableValueRaw("x")
+	statement := p.Parse()
+	in := NewInterpreter()
+	in.Interpret(statement)
+	valueA := in.currentSymbolTable.getVariableValueRaw("a")
+	valueX := in.currentSymbolTable.getVariableValueRaw("x")
 	if !numberEquals(valueA, int64(1)) {
 		t.Errorf("var not assign to varible effective, valueExpr should be 1, got %v", valueA)
 	}
@@ -35,12 +35,12 @@ r2 = a;
 r3 = a;
 `
 	p := getParser(source)
-	statement := p.parse()
-	in := newInterpreter()
-	in.interpret(statement)
-	value1 := in.current.getVariableValueRaw("r1")
-	value2 := in.current.getVariableValueRaw("r2")
-	value3 := in.current.getVariableValueRaw("r3")
+	statement := p.Parse()
+	in := NewInterpreter()
+	in.Interpret(statement)
+	value1 := in.currentSymbolTable.getVariableValueRaw("r1")
+	value2 := in.currentSymbolTable.getVariableValueRaw("r2")
+	value3 := in.currentSymbolTable.getVariableValueRaw("r3")
 	if !numberEquals(value1, int64(1)) {
 		t.Errorf("var not assign to varible effective, valueExpr should be 1, got %v", value1)
 	}
@@ -70,10 +70,10 @@ if x == 1 {
 }
 `, values[i])
 		p := getParser(source)
-		statement := p.parse()
-		in := newInterpreter()
-		in.interpret(statement)
-		r := in.current.getVariableValueRaw("r")
+		statement := p.Parse()
+		in := NewInterpreter()
+		in.Interpret(statement)
+		r := in.currentSymbolTable.getVariableValueRaw("r")
 		if r != int64(result[i]) {
 			t.Errorf("expect 'r' = %d, but got %d", result[i], r)
 		}
@@ -91,10 +91,10 @@ for var i , j = 0, 0; i < 12; i , j = i + 1 , j + 1 {
 }
 `
 	p := getParser(source)
-	statement := p.parse()
-	in := newInterpreter()
-	in.interpret(statement)
-	sum := in.current.getVariableValueRaw("sum")
+	statement := p.Parse()
+	in := NewInterpreter()
+	in.Interpret(statement)
+	sum := in.currentSymbolTable.getVariableValueRaw("sum")
 	if sum != int64(90) {
 		t.Errorf("expect 'sum' = %d, but got %d", 90, sum)
 	}
@@ -112,11 +112,30 @@ while i < 20 {
 }
 `
 	p := getParser(source)
-	statement := p.parse()
-	in := newInterpreter()
-	in.interpret(statement)
-	sum := in.current.getVariableValueRaw("sum")
+	statement := p.Parse()
+	in := NewInterpreter()
+	in.Interpret(statement)
+	sum := in.currentSymbolTable.getVariableValueRaw("sum")
 	if sum != int64(45) {
 		t.Errorf("expect 'sum' = %d, but got %d", 45, sum)
+	}
+}
+
+func TestFunction(t *testing.T) {
+	source := `
+var sum = 0;
+func add(x, y) {
+	return x + y;
+}
+sum = add(1 , 2);
+
+`
+	p := getParser(source)
+	statement := p.Parse()
+	in := NewInterpreter()
+	in.Interpret(statement)
+	sum := in.currentSymbolTable.getVariableValueRaw("sum")
+	if sum != int64(3) {
+		t.Errorf("expect 'sum' = %d, but got %d", 3, sum)
 	}
 }
