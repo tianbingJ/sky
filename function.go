@@ -28,6 +28,9 @@ func (f *function) call(i *Interpreter, arguments []interface{}) (ret interface{
 	//return value
 	defer func() {
 		v := recover()
+		if v == nil {
+			return
+		}
 		if returnValue, ok := v.(*returnV); ok {
 			ret = returnValue.value
 			return

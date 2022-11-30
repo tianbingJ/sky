@@ -15,5 +15,4 @@ func main() {
 	stmts := parser.Parse()
 	interpret := sky.NewInterpreter()
 	interpret.Interpret(stmts)
-
 }

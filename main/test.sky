@@ -1,2 +1,15 @@
 
-print("hello");
+
+var c = 0;
+func makeCount(incr) {
+    func counter() {
+        c = c + incr;
+    }
+    return counter;
+}
+
+var count = makeCount(2);
+count();
+print(c);
+count();
+print(c);
