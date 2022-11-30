@@ -15,12 +15,15 @@ func newSymbolTable(prev *symbolTable) *symbolTable {
 		prev:    prev,
 	}
 }
+func (s *symbolTable) defineRaw(name string, value interface{}) {
+	s.symbols[name] = value
+}
 
 func (s *symbolTable) define(name token, value interface{}) {
 	if _, ok := s.symbols[name.lexeme]; ok {
 		panic(newRuntimeError(fmt.Sprintf("variable %s already defined", name.lexeme), name))
 	}
-	s.symbols[name.lexeme] = value
+	s.defineRaw(name.lexeme, value)
 }
 
 func (s *symbolTable) getVariableValueRaw(name string) interface{} {

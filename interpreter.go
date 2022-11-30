@@ -7,10 +7,13 @@ type Interpreter struct {
 
 func NewInterpreter() *Interpreter {
 	globalTable := newSymbolTable(nil)
-	return &Interpreter{
+
+	i := &Interpreter{
 		globalSymbolTable:  globalTable,
 		currentSymbolTable: globalTable,
 	}
+	i.registerFunction()
+	return i
 }
 
 func (i *Interpreter) Interpret(statements []stmt) {
@@ -69,7 +72,7 @@ func (i *Interpreter) visitUnaryExpr(expression *unaryExpr) interface{} {
 
 func (i *Interpreter) visitCallExpr(expression *callExpr) interface{} {
 	callee := i.evaluate(expression.callee)
-	f, isFunction := callee.(*function)
+	f, isFunction := callee.(callable)
 	if !isFunction {
 		panic(newRuntimeError("expression cannot be called", expression.paren))
 	}

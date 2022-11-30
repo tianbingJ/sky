@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	file, err := ioutil.ReadFile("test.sky")
+	file, err := ioutil.ReadFile("./main/test.sky")
 	if err != nil {
 		panic(err)
 	}
@@ -15,4 +15,5 @@ func main() {
 	stmts := parser.Parse()
 	interpret := sky.NewInterpreter()
 	interpret.Interpret(stmts)
+
 }
