@@ -25,8 +25,7 @@ type syntaxError struct {
 }
 
 func (s syntaxError) Error() string {
-	return fmt.Sprintf("Unexpected name '%s', %s at line %d  column %d\n",
-		s.token.tokenType, s.expected, s.token.line, s.token.column)
+	return fmt.Sprintf("%s at line %d  column %d\n", s.expected, s.token.line, s.token.column)
 }
 
 func newSyntaxError(expected string, tok token) error {

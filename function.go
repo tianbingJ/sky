@@ -1,5 +1,7 @@
 package sky
 
+import "fmt"
+
 type function struct {
 	declaration *functionStmt
 	symbols     *symbolTable
@@ -11,6 +13,10 @@ type returnV struct {
 
 func newReturnV(value interface{}) *returnV {
 	return &returnV{value: value}
+}
+
+func (r *returnV) Error() string {
+	return fmt.Sprintf("return value: %v", r.value)
 }
 
 func newFunction(declaration *functionStmt, symbols *symbolTable) *function {

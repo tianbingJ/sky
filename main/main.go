@@ -13,6 +13,8 @@ func main() {
 	lexer := sky.NewLexer(string(file))
 	parser := sky.NewParser(lexer.Parse())
 	stmts := parser.Parse()
-	interpret := sky.NewInterpreter()
-	interpret.Interpret(stmts)
+	//interpret := sky.NewInterpreter()
+	semanticResolver := sky.NewSemanticResolver()
+	semanticResolver.Resolve(stmts)
+	//interpret.Interpret(stmts)
 }

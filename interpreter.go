@@ -178,6 +178,9 @@ func (i *Interpreter) visitForStmt(forstmt *forStmt) {
 		if value, ok := v.(control_code); ok && value == break_code {
 			return
 		}
+		if v == nil {
+			return
+		}
 		panic(v)
 	}()
 

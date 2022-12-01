@@ -1,5 +1,5 @@
 
-
+/*
 var c = 0;
 func makeCount(incr) {
     func counter() {
@@ -13,3 +13,29 @@ count();
 print(c);
 count();
 print(c);
+
+var t1 = clock();
+var sum = 0;
+for var i = 0; i < 1000000; i = i + 1 {
+    sum = sum + i;
+}
+print(sum);
+var t2 = clock();
+print(t2 - t1);
+*/
+
+var sum = 0;
+for var i = 0; i < 1000000; i = i + 1 {
+    sum = sum + i;
+}
+
+var a = "global";
+{
+    b = 100;
+    func showA() {
+        print(a);
+    }
+    showA();
+    var a = "local";
+    showA();
+}

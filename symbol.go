@@ -37,7 +37,7 @@ func (s *symbolTable) getVariableValueRaw(name string) interface{} {
 func (s *symbolTable) getVariableValue(name token) interface{} {
 	symbol := s.getSymbolByVariable(name.lexeme)
 	if symbol == nil {
-		panic(newRuntimeError(fmt.Sprintf("variable %s not defined", name.lexeme), name))
+		panic(newRuntimeError(fmt.Sprintf("variable '%s' not defined", name.lexeme), name))
 	}
 	return symbol.symbols[name.lexeme]
 }
