@@ -198,7 +198,7 @@ func (i *Interpreter) visitForStmt(forstmt *forStmt) {
 
 	if forstmt.varDeclaration != nil {
 		forstmt.varDeclaration.accept(i)
-	} else {
+	} else if forstmt.initializers != nil {
 		forstmt.initializers.accept(i)
 	}
 

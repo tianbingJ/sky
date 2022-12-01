@@ -31,17 +31,19 @@ for var i = 0; i < 1000000; i = i + 1 {
 }
 */
 {
-    var a = "global";
+    var i, j = 0, 0;
+    print(j);
+
     {
         var y = "y2";
         func showA() {
-            var y = "y1";
-            inspectSymbols("showA");
-            print(a);
+            for ; i < 10; i, j = i +1, j + 1 {
+                print(i + j);
+            }
         }
 
-        showA();
-        var a = "local";
+        var i,j = 100, 200;
         showA();
     }
+
 }

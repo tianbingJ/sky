@@ -219,6 +219,8 @@ func (p *parser) forStmt() *forStmt {
 		varDeclaration = p.varStatement()
 	} else if p.peek().tokenType != SEMICOLON {
 		initializers = p.assignStmt(true)
+	} else {
+		p.consume(SEMICOLON)
 	}
 	condition = p.expression()
 	p.consume(SEMICOLON)
