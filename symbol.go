@@ -34,6 +34,20 @@ func (s *symbolTable) getVariableValueRaw(name string) interface{} {
 	return s.symbols[name]
 }
 
+func (s *symbolTable) getVariableByDistance(distance int, name token) interface{} {
+	t := s.getTableByDistance(distance)
+	v, _ := t.symbols[name.lexeme]
+	return v
+}
+
+func (s *symbolTable) getTableByDistance(distance int) *symbolTable {
+	t := s
+	for i := 0; i < distance; i++ {
+		t = t.prev
+	}
+	return t
+}
+
 func (s *symbolTable) getVariableValue(name token) interface{} {
 	symbol := s.getSymbolByVariable(name.lexeme)
 	if symbol == nil {
@@ -48,6 +62,11 @@ func (s *symbolTable) assign(name token, value interface{}) {
 		panic(newRuntimeError(fmt.Sprintf("variable %s not defined", name.lexeme), name))
 	}
 	symbol.symbols[name.lexeme] = value
+}
+
+func (s *symbolTable) assignByDistance(distance int, name token, value interface{}) {
+	t := s.getTableByDistance(distance)
+	t.assign(name, value)
 }
 
 func (s *symbolTable) getSymbolByVariable(variableName string) *symbolTable {

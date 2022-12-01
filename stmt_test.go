@@ -9,7 +9,9 @@ func TestVarStmt(t *testing.T) {
 	source := `var a, x = 1, "string";`
 	p := getParser(source)
 	statement := p.Parse()
-	in := NewInterpreter()
+	resolver := NewSemanticResolver()
+	resolver.Resolve(statement)
+	in := NewInterpreter(resolver.distances)
 	in.Interpret(statement)
 	valueA := in.currentSymbolTable.getVariableValueRaw("a")
 	valueX := in.currentSymbolTable.getVariableValueRaw("x")
@@ -36,7 +38,10 @@ r3 = a;
 `
 	p := getParser(source)
 	statement := p.Parse()
-	in := NewInterpreter()
+	resolver := NewSemanticResolver()
+	resolver.Resolve(statement)
+	resolver.Resolve(statement)
+	in := NewInterpreter(resolver.distances)
 	in.Interpret(statement)
 	value1 := in.currentSymbolTable.getVariableValueRaw("r1")
 	value2 := in.currentSymbolTable.getVariableValueRaw("r2")
@@ -71,7 +76,9 @@ if x == 1 {
 `, values[i])
 		p := getParser(source)
 		statement := p.Parse()
-		in := NewInterpreter()
+		resolver := NewSemanticResolver()
+		resolver.Resolve(statement)
+		in := NewInterpreter(resolver.distances)
 		in.Interpret(statement)
 		r := in.currentSymbolTable.getVariableValueRaw("r")
 		if r != int64(result[i]) {
@@ -92,7 +99,9 @@ for var i , j = 0, 0; i < 12; i , j = i + 1 , j + 1 {
 `
 	p := getParser(source)
 	statement := p.Parse()
-	in := NewInterpreter()
+	resolver := NewSemanticResolver()
+	resolver.Resolve(statement)
+	in := NewInterpreter(resolver.distances)
 	in.Interpret(statement)
 	sum := in.currentSymbolTable.getVariableValueRaw("sum")
 	if sum != int64(90) {
@@ -113,7 +122,9 @@ while i < 20 {
 `
 	p := getParser(source)
 	statement := p.Parse()
-	in := NewInterpreter()
+	resolver := NewSemanticResolver()
+	resolver.Resolve(statement)
+	in := NewInterpreter(resolver.distances)
 	in.Interpret(statement)
 	sum := in.currentSymbolTable.getVariableValueRaw("sum")
 	if sum != int64(45) {
@@ -132,7 +143,9 @@ sum = f(1 , 2);
 `
 	p := getParser(source)
 	statement := p.Parse()
-	in := NewInterpreter()
+	resolver := NewSemanticResolver()
+	resolver.Resolve(statement)
+	in := NewInterpreter(resolver.distances)
 	in.Interpret(statement)
 	sum := in.currentSymbolTable.getVariableValueRaw("sum")
 	if sum != int64(3) {

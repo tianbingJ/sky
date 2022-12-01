@@ -24,18 +24,24 @@ var t2 = clock();
 print(t2 - t1);
 */
 
+/*
 var sum = 0;
 for var i = 0; i < 1000000; i = i + 1 {
     sum = sum + i;
 }
-
-var a = "global";
+*/
 {
-    b = 100;
-    func showA() {
-        print(a);
+    var a = "global";
+    {
+        var y = "y2";
+        func showA() {
+            var y = "y1";
+            inspectSymbols("showA");
+            print(a);
+        }
+
+        showA();
+        var a = "local";
+        showA();
     }
-    showA();
-    var a = "local";
-    showA();
 }

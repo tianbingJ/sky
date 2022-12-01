@@ -33,7 +33,19 @@ func NewSemanticResolver() *semanticResolver {
 		inWhile:    false,
 		inFunction: false,
 		scopes:     make([]*scope, 0),
+		distances:  make(map[expr]int, 0),
 	}
+}
+
+func (s *semanticResolver) GetDistances() map[expr]int {
+	return s.distances
+}
+
+func (s *semanticResolver) getDistance(expression expr) (int, bool) {
+	if v, ok := s.distances[expression]; ok {
+		return v, true
+	}
+	return 0, false
 }
 
 func (s *semanticResolver) Resolve(stmts []stmt) {
@@ -120,8 +132,10 @@ func (s *semanticResolver) visitIfStmt(ifstmt *ifStmt) {
 func (s *semanticResolver) visitForStmt(forstmt *forStmt) {
 	inFor := s.inFor
 	s.inFor = true
+	s.beginScope()
 	defer func() {
 		s.inFor = inFor
+		s.endScope()
 	}()
 	if forstmt.varDeclaration != nil {
 		s.resolveStmt(forstmt.varDeclaration)
@@ -224,6 +238,7 @@ func (s *semanticResolver) visitVariableExpr(expression *variableExpr) interface
 		if v, ok := s.peekScope().symbols[expression.token.lexeme]; ok && v == DECLARED {
 			panic(newSyntaxError(fmt.Sprintf("%s is not defined", expression.token.lexeme), expression.token))
 		}
+		s.resolve(expression, expression.token)
 	}
 	return nil
 }

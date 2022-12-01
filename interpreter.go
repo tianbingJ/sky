@@ -3,14 +3,16 @@ package sky
 type Interpreter struct {
 	globalSymbolTable  *symbolTable
 	currentSymbolTable *symbolTable
+	distance           map[expr]int
 }
 
-func NewInterpreter() *Interpreter {
+func NewInterpreter(distance map[expr]int) *Interpreter {
 	globalTable := newSymbolTable(nil)
 
 	i := &Interpreter{
 		globalSymbolTable:  globalTable,
 		currentSymbolTable: globalTable,
+		distance:           distance,
 	}
 	i.registerFunction()
 	return i
@@ -115,7 +117,17 @@ func (i *Interpreter) visitLiteralExpr(expression *literalExpr) interface{} {
 }
 
 func (i *Interpreter) visitVariableExpr(expression *variableExpr) interface{} {
-	return i.currentSymbolTable.getVariableValue(expression.token)
+	if v, ok := i.distance[expression]; ok {
+		return i.currentSymbolTable.getVariableByDistance(v, expression.token)
+	}
+	return i.globalSymbolTable.getVariableValue(expression.token)
+}
+
+func (i *Interpreter) lookupVariable(name token, expression expr) interface{} {
+	if dis, ok := i.distance[expression]; ok {
+		return i.currentSymbolTable.getVariableByDistance(dis, name)
+	}
+	return i.globalSymbolTable.getVariableValue(name)
 }
 
 func (i *Interpreter) evaluate(expression expr) interface{} {
@@ -228,7 +240,12 @@ func (i *Interpreter) visitAssignStmt(st *assignStmt) {
 		} else {
 			value = nil
 		}
-		i.currentSymbolTable.assign(name, value)
+		v, ok := i.distance[valueExpr]
+		if ok {
+			i.currentSymbolTable.assignByDistance(v, name, value)
+		} else {
+			i.globalSymbolTable.assign(name, value)
+		}
 	}
 }
 
