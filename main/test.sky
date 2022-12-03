@@ -13,6 +13,7 @@ count();
 print(c);
 count();
 print(c);
+*/
 
 var t1 = clock();
 var sum = 0;
@@ -22,14 +23,23 @@ for var i = 0; i < 1000000; i = i + 1 {
 print(sum);
 var t2 = clock();
 print(t2 - t1);
+
+
+
+/*
+var c1 = clock();
+func fib(x) {
+    if x <= 2 {
+        return x;
+    }
+    return fib(x - 1) + fib(x - 2);
+}
+fib(30);
+var c2 = clock();
+print(c2 - c1);
 */
 
 /*
-var sum = 0;
-for var i = 0; i < 1000000; i = i + 1 {
-    sum = sum + i;
-}
-*/
 {
     var i, j = 0, 0;
     print(j);
@@ -45,5 +55,6 @@ for var i = 0; i < 1000000; i = i + 1 {
         var i,j = 100, 200;
         showA();
     }
-
 }
+*/
+

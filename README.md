@@ -37,15 +37,26 @@ nil表示变量没有绑定值，变量未被初始化时是nil，也可以赋�
 
 ### 整数类型
 
-整数类型为了简单起见，全部都转为long型
+整数类型为了简单起见，全部都转为int64类型
+
+### 浮点类型
 
 ```
 var a = 1;
-var b = 2;
+var b = 2.2;
 var c = a + b;
 ```
 
+### string
+```
+var s = "hello " + "world";
+```
+
 ## 表达式
+
+### 字面值
+
+### 算法表达式
 
 优先级从低到高：
 
@@ -60,13 +71,21 @@ var c = a + b;
 |      * / %       |      乘       | 左结合 |
 |       - !        |    一元运算符     | 右结合 |
 
+
 ## 语句
 
-### 变量声明
+
+### 变量声明语句
 
 ```
-var x = 1
-var y    //default nil
+var x = 1;
+var y;    //default nil
+var a, b = x, x * y;
+```
+
+### 赋值语句
+```
+a, b = x, y;
 ```
 
 ### if条件语句
@@ -98,15 +117,12 @@ Sky只把nil和false判断为false，其他全部为true。
 
 for initializer; condition; incr {
 }
-```
 
-initializer 可以是 变量声明语句，可以是任意表达式，可以是赋值语句;
 initializer和incr可以不填。
-目前initializer和incr都只支持单条语句。
+initializer支持声明语句和复制语句，最多支持一个'=',多个变量可以使用多变量声明的形式。
 
-```
-for var i = 0; i < 10; i ++ {
-
+for var i, j = 0; i < 10; i, j = i + 1, j + 1 {
+    //do something
 }
 ```
 
@@ -114,10 +130,28 @@ for var i = 0; i < 10; i ++ {
 
 ```
 while (condition) {
-
+    //do something
 }
 ```
 
 ## 函数
 
+```
+func add(a, b) {
+    return a + b;
+}
+
+函数可以有返回值,没有return默认返回nil。
+```
+
 ## 闭包
+```
+    func makeTimes(factor) {
+        func times(x ) {
+            return  x * factor;
+        }
+        return times;
+    }
+    var f10 = makeTimes(10);
+    print(f10(3)); //30
+```
